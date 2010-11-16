@@ -1,0 +1,22 @@
+﻿<Window x:Class="jigsaw.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Jigsaw" Height="350" Width="525">
+    <StackPanel>
+        <StackPanel.Resources>
+            <XmlDataProvider x:Key="tables" Source="database.xml" XPath="db/table"/>
+        </StackPanel.Resources>
+        <ListView>
+            <ListView.ItemsSource>
+                <Binding Source="{StaticResource tables}"/>
+            </ListView.ItemsSource>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn DisplayMemberBinding="{Binding XPath=@name}" Header="Table name"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding XPath=@size}" Header="Size"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding XPath=@foreignKey}" Header="Foreign Key"/>                    
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </StackPanel>
+</Window>

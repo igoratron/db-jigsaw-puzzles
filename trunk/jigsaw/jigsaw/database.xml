@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<db>
+	<table name="table1" size="45" foreignKey="table2"/>
+	<table name="table2" size="21"/>
+	<table name="table3" size="33"/>
+	<table name="table4" size="75"/>
+	<table name="table5" size="10"/>
+</db>
