@@ -72,8 +72,10 @@ namespace jigsaw
             for(int i = 0; i < sectors.Count; i++)
             {
                 Piece p = new Piece();
-                p.Rect = sectors[i].Rect;
-                p.Direction = sectors[i].RelationTo;
+                Sector current = sectors[i];
+                p.Rect = current.Rect;
+                p.Direction = current.RelationTo;
+                p.TableName = current.Name;
                 p.Color = getBrush(i);
                 canvas.Children.Add(p);
             }

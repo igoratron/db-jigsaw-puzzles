@@ -11,9 +11,9 @@ namespace jigsaw
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (value is Size)
+            if (value is Rect)
             {
-                return new Rect((Size)value);
+                return new Rect(((Rect)value).Size);
             }
             else
             {

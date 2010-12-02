@@ -7,9 +7,17 @@
              x:Name="root">
     <UserControl.Resources>
         <conv:DirectionConverter x:Key="DirectionConverter"/>
+        <conv:RectConverter x:Key="RectConverter"/>
     </UserControl.Resources>
-    <Grid>
-        <Path x:Name="path" Fill ="{Binding Color, ElementName=root}" Stroke="Black" StrokeThickness="2" MouseDown="path_MouseDown" MouseMove="path_MouseMove" MouseUp="path_MouseUp">
+    <UserControl.RenderTransform>
+        <TranslateTransform x:Name="translate" X="{Binding Rect.X, ElementName=root}" Y="{Binding Rect.Y, ElementName=root}"/>
+    </UserControl.RenderTransform>
+    <Canvas>
+        <Path x:Name="path" Fill ="{Binding Color, ElementName=root}" Stroke="Black" StrokeThickness="2"
+              MouseDown="path_MouseDown"
+              MouseMove="path_MouseMove"
+              MouseUp="path_MouseUp"
+              DragOver="path_DragOver">
             <Path.Data>
                 <CombinedGeometry GeometryCombineMode="Union">
                     <CombinedGeometry.Geometry1>
@@ -23,10 +31,11 @@
                         </EllipseGeometry>
                     </CombinedGeometry.Geometry1>
                     <CombinedGeometry.Geometry2>
-                        <RectangleGeometry Rect="{Binding Rect, ElementName=root}"/>
+                        <RectangleGeometry Rect="{Binding Rect, ElementName=root, Converter={StaticResource RectConverter}}"/>
                     </CombinedGeometry.Geometry2>
                 </CombinedGeometry>
             </Path.Data>
         </Path>
-    </Grid>
+        <Label Content="{Binding TableName, ElementName=root}"/>
+    </Canvas>
 </UserControl>
