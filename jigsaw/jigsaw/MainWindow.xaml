@@ -9,12 +9,12 @@
             <ColumnDefinition Width="175"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <ListView Grid.Column="0">
+        <ListView Grid.Column="0" x:Name="dbView">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Table name"/>
-                    <GridViewColumn Header="Size"/>
-                    <GridViewColumn Header="Foreign Key"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Table name"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Value}" Header="Size"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding RelationTo}" Header="Foreign Key"/>
                 </GridView>
             </ListView.View>
         </ListView>

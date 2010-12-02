@@ -5,10 +5,11 @@
     /// </summary>
     public class InputValue
     {
-        public InputValue(string name, double value)
+        public InputValue(string name, double value, string relationTo)
         {
             this.Name = name;
             this.Value = value;
+            this.RelationTo = relationTo;
         }
 
         public string Name
@@ -18,6 +19,12 @@
         }
 
         public double Value
+        {
+            get;
+            set;
+        }
+
+        public string RelationTo
         {
             get;
             set;

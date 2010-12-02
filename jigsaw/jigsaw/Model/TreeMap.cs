@@ -1,4 +1,4 @@
-﻿namespace DavidWynne.TreeMap.Silverlight.Model
+﻿ namespace DavidWynne.TreeMap.Silverlight.Model
 {
     using System;
     using System.Collections.Generic;
@@ -67,6 +67,8 @@
             // Sort Descending
             values.Sort((x, y) => y.Value.CompareTo(x.Value));
 
+            PairSectors(values);
+
             double totalArea = workAreaWidth * workAreaHeight;
             double sumOfValues = 0;
             values.ForEach(value => sumOfValues += value.Value);
@@ -84,11 +86,33 @@
                                     Name = inputValue.Name,
                                     OriginalValue = inputValue.Value,
                                     Area = area,
-                                    Percentage = percentage
+                                    Percentage = percentage,
+                                    RelationTo = inputValue.RelationTo
                             });
             }
 
             return sectors;
+        }
+
+        private static void PairSectors(List<InputValue> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (values[i].RelationTo != null)
+                {
+                    int parentIndex = values.FindIndex((value) => value.Name.Equals(values[i].RelationTo));
+                    values.Insert(parentIndex + 1, values[i]);
+                    if (parentIndex > i)
+                    {
+                        values.RemoveAt(i);
+                    }
+                    else
+                    {
+                        values.RemoveAt(i + 1);
+                    }
+
+                }
+            }
         }
 
         /// <summary>
@@ -161,11 +185,29 @@
                 {
                     width = currentHeight;
                     height = sector.Area / currentHeight;
+
+                    if (sector.RelationTo != null)
+                    {
+                        sector.RelationTo = "West";
+                    }
+                    else
+                    {
+                        sector.RelationTo = "None";
+                    }
+
                 }
                 else
                 {
                     width = sector.Area / currentHeight;
                     height = currentHeight;
+                    if (sector.RelationTo != null)
+                    {
+                        sector.RelationTo = "South";
+                    }
+                    else
+                    {
+                        sector.RelationTo = "None";
+                    }
                 }
 
                 sector.Rect = new Rect(brushX, brushY, width, height);

@@ -39,22 +39,27 @@ namespace jigsaw
                 if (XmlNodeType.Element.Equals(reader.NodeType) &&
                     "table".Equals(reader.Name))
                 {
-                    String name = null;
-                    Int32 size = 0;
+                    string name = null;
+                    int size = 0;
+                    string relationTo = null;
                     while (reader.MoveToNextAttribute())
                     {
                         switch (reader.Name)
                         {
                             case "size":
-                                size = Int32.Parse(reader.Value);
+                                size = int.Parse(reader.Value);
                                 break;
                             case "name":
                                 name = reader.Value;
                                 break;
+                            case "foreignKey":
+                                relationTo = reader.Value;
+                                break;
                         }
                     }
-                    result.Add(new InputValue(name, size));
-                }
+                    result.Add(new InputValue(name, size, relationTo));
+                    dbView.Items.Add(new InputValue(name, size, relationTo));
+               } 
             }
 
             return result;
@@ -64,23 +69,23 @@ namespace jigsaw
         {
             List<Sector> sectors = TreeMap.Plot(values, new Size(400, 300));
 
-            foreach (Sector sector in sectors)
+            for(int i = 0; i < sectors.Count; i++)
             {
                 Piece p = new Piece();
-                p.Rect = sector.Rect;
-                p.Direction = "South";
-                p.Color = getRandomBrush();
+                p.Rect = sectors[i].Rect;
+                p.Direction = sectors[i].RelationTo;
+                p.Color = getBrush(i);
                 canvas.Children.Add(p);
             }
         }
 
-        private Brush getRandomBrush()
+        private Brush getBrush(Int32 i)
         {
             Brush[] brushes = {
-                                  Brushes.Red, Brushes.Orange, Brushes.Yellow, Brushes.Lime, Brushes.Green, Brushes.Purple, Brushes.Blue
+                                  Brushes.Red, Brushes.Lime, Brushes.Purple, Brushes.Orange, Brushes.Yellow, Brushes.Blue, Brushes.Green, 
                               };
 
-            return brushes[random.Next(brushes.Length)];
+            return brushes[i % brushes.Length];
         }
     }
 }
