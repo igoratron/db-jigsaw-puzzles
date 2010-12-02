@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="jigsaw.Piece"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:conv="clr-namespace:jigsaw"
+             x:Name="root">
+    <UserControl.Resources>
+        <conv:DirectionConverter x:Key="DirectionConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Path x:Name="path" Fill ="{Binding Color, ElementName=root}" Stroke="Black" StrokeThickness="2" MouseDown="path_MouseDown" MouseMove="path_MouseMove" MouseUp="path_MouseUp">
+            <Path.Data>
+                <CombinedGeometry GeometryCombineMode="Union">
+                    <CombinedGeometry.Geometry1>
+                        <EllipseGeometry RadiusX="20" RadiusY="20">
+                            <EllipseGeometry.Center>
+                                <MultiBinding Converter="{StaticResource DirectionConverter}">
+                                    <Binding ElementName="root" Path="Direction"/>
+                                    <Binding ElementName="root" Path="Rect"/>
+                                </MultiBinding>
+                            </EllipseGeometry.Center>
+                        </EllipseGeometry>
+                    </CombinedGeometry.Geometry1>
+                    <CombinedGeometry.Geometry2>
+                        <RectangleGeometry Rect="{Binding Rect, ElementName=root}"/>
+                    </CombinedGeometry.Geometry2>
+                </CombinedGeometry>
+            </Path.Data>
+        </Path>
+    </Grid>
+</UserControl>
