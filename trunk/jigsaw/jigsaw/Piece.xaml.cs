@@ -24,7 +24,7 @@ namespace jigsaw
         public static readonly DependencyProperty ColorProperty = DependencyProperty.Register("Color", typeof(Brush), typeof(Piece));
         public static readonly DependencyProperty DirectionProperty = DependencyProperty.Register("Direction", typeof(String), typeof(Piece), new PropertyMetadata("None"));
         public static readonly DependencyProperty RectProperty = DependencyProperty.Register("Rect", typeof(Rect), typeof(Piece));
-        public static readonly DependencyProperty TableNameProperty = DependencyProperty.Register("TableName", typeof(int), typeof(Piece));
+        public static readonly DependencyProperty TableNameProperty = DependencyProperty.Register("TableName", typeof(string), typeof(Piece));
 
         //Properties
         public Brush Color
@@ -63,11 +63,11 @@ namespace jigsaw
             }
         }
 
-        public int TableName
+        public string TableName
         {
             get
             {
-                return (int)GetValue(TableNameProperty);
+                return (string)GetValue(TableNameProperty);
             }
             set
             {
@@ -76,14 +76,12 @@ namespace jigsaw
         }
 
         private static DropShadowEffect shadow = new DropShadowEffect();
-        private TranslateTransform translate;
         private Point startingPosition;
 
         public Piece()
         {
             InitializeComponent();
             startingPosition = new Point();
-            translate = new TranslateTransform();
             shadow.ShadowDepth = 5;
         }
 
@@ -93,8 +91,8 @@ namespace jigsaw
             
             Grid.SetZIndex(this, 1);
 
-            startingPosition.X = e.GetPosition(this).X - translate.X;
-            startingPosition.Y = e.GetPosition(this).Y - translate.Y;
+            startingPosition.X = e.GetPosition(this).X;
+            startingPosition.Y = e.GetPosition(this).Y;
         }
 
         private void path_MouseUp(object sender, MouseButtonEventArgs e)
@@ -107,10 +105,16 @@ namespace jigsaw
         {
             if (MouseButtonState.Pressed.Equals(e.LeftButton))
             {
-                translate.X = e.GetPosition(this).X - startingPosition.X;
-                translate.Y = e.GetPosition(this).Y - startingPosition.Y;
-                path.RenderTransform = translate;
+                Rect rect = this.Rect;
+                rect.X = e.GetPosition(this).X + translate.X - startingPosition.X;
+                rect.Y = e.GetPosition(this).Y + translate.Y - startingPosition.Y;
+                this.Rect = rect;
             }
+        }
+
+        private void path_DragOver(object sender, DragEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("Dragging over");
         }
     }
 }

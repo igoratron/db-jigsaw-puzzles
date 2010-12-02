@@ -18,6 +18,6 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Canvas Grid.Column="1" x:Name="canvas"/>
+        <Canvas Grid.Column="1" x:Name="canvas" Margin="54,54,0,0" />
     </Grid>
 </Window>

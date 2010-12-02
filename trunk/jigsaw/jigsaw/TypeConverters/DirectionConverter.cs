@@ -19,15 +19,15 @@ namespace jigsaw
                 switch (direction)
                 {
                     case "north":
-                        return new Point(rect.X + rect.Width / 2, rect.Y - 10);
+                        return new Point(rect.Width / 2, -10);
                     case "east":
-                        return new Point(rect.X + rect.Width + 10, rect.Y + rect.Height / 2);
+                        return new Point(rect.Width + 10, rect.Height / 2);
                     case "south":
-                        return new Point(rect.X + rect.Width / 2, rect.Y + rect.Height + 10);
+                        return new Point(rect.Width / 2, rect.Height + 10);
                     case "west":
-                        return new Point(rect.X - 10, rect.Y + rect.Height / 2);
+                        return new Point(-10, rect.Height / 2);
                     case "none":
-                        return new Point(rect.X + 20, rect.Y + 20);
+                        return new Point(20, 20);
                     default:
                         throw new ArgumentException("Invalid direction");
                 }
