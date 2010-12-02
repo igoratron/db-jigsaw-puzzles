@@ -36,5 +36,12 @@
             get;
             set;
         }
+
+        public string RelationTo
+        {
+            get;
+            set;
+        }
+
     }
 }

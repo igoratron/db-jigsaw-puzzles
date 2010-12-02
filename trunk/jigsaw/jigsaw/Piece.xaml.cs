@@ -24,6 +24,7 @@ namespace jigsaw
         public static readonly DependencyProperty ColorProperty = DependencyProperty.Register("Color", typeof(Brush), typeof(Piece));
         public static readonly DependencyProperty DirectionProperty = DependencyProperty.Register("Direction", typeof(String), typeof(Piece), new PropertyMetadata("None"));
         public static readonly DependencyProperty RectProperty = DependencyProperty.Register("Rect", typeof(Rect), typeof(Piece));
+        public static readonly DependencyProperty TableNameProperty = DependencyProperty.Register("TableName", typeof(int), typeof(Piece));
 
         //Properties
         public Brush Color
@@ -59,6 +60,18 @@ namespace jigsaw
             set
             {
                 SetValue(RectProperty, value);
+            }
+        }
+
+        public int TableName
+        {
+            get
+            {
+                return (int)GetValue(TableNameProperty);
+            }
+            set
+            {
+                SetValue(TableNameProperty, value);
             }
         }
 
