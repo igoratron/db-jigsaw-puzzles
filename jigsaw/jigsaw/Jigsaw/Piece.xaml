@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="jigsaw.Piece"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:conv="clr-namespace:jigsaw"
+             x:Name="root"
+             Canvas.Top="{Binding Path=Y, RelativeSource={RelativeSource Self}}"
+             Canvas.Left="{Binding Path=X, RelativeSource={RelativeSource Self}}">
+    <UserControl.Resources>
+        <conv:SizeConverter x:Key="SizeConverter" />
+    </UserControl.Resources>
+    <Canvas>
+        <Path x:Name="path" Fill ="{Binding Color, ElementName=root}" Stroke="Black" StrokeThickness="2"
+              MouseDown="MouseDownHandler"
+              MouseMove="MouseMoveHandler"
+              MouseUp="MouseUpHandler">
+            <Path.Data>
+                <CombinedGeometry x:Name="pathGeometry" GeometryCombineMode="Union">
+                    <CombinedGeometry.Geometry1>
+                        <EllipseGeometry x:Name="tab" RadiusX="20" RadiusY="20" Center="20,20"/>
+                    </CombinedGeometry.Geometry1>
+                    <CombinedGeometry.Geometry2>
+                        <RectangleGeometry>
+                            <RectangleGeometry.Rect>
+                                <MultiBinding Converter="{StaticResource SizeConverter}">
+                                    <Binding Path="Width" ElementName="root"/>
+                                    <Binding Path="Height" ElementName="root"/>
+                                </MultiBinding>
+                            </RectangleGeometry.Rect>
+                        </RectangleGeometry>
+                    </CombinedGeometry.Geometry2>
+                </CombinedGeometry>
+            </Path.Data>
+        </Path>
+        <Label Content="{Binding Name, ElementName=root}"/>
+    </Canvas>
+</UserControl>

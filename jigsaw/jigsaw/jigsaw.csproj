@@ -55,8 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\GroupSector.cs" />
-    <Compile Include="TypeConverters\DirectionConverter.cs" />
+    <Compile Include="TypeConverters\SizeConverter.cs" />
     <Compile Include="TypeConverters\RectConverter.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -70,16 +69,13 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Piece.xaml">
+    <Page Include="Jigsaw\Piece.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\InputValue.cs" />
-    <Compile Include="Model\Sector.cs" />
-    <Compile Include="Model\TreeMap.cs" />
-    <Compile Include="Piece.xaml.cs">
+    <Compile Include="Jigsaw\Piece.xaml.cs">
       <DependentUpon>Piece.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -109,6 +105,9 @@
     <Resource Include="database.xml">
       <SubType>Designer</SubType>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Model\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
