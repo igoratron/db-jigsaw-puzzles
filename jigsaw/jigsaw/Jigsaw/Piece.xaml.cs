@@ -64,11 +64,13 @@ namespace jigsaw
         private static DropShadowEffect shadow = new DropShadowEffect();
         private Point startingPosition;
         private Canvas parent;
+        private List<Piece> hitTestResults;
 
         public Piece()
         {
             InitializeComponent();
             shadow.ShadowDepth = 5;
+            hitTestResults = new List<Piece>();
         }
 
         private void MouseDownHandler(object sender, MouseButtonEventArgs e)
@@ -107,21 +109,36 @@ namespace jigsaw
                 X = mouse.X - startingPosition.X;
                 Y = mouse.Y - startingPosition.Y;
 
+                //FIXME: don't create a clone everytime!
+                Geometry g = path.RenderedGeometry.CloneCurrentValue();
+                g.Transform = new TranslateTransform(X, Y);
+
                 if (parent != null)
                 {
+                    hitTestResults.Clear();
                     VisualTreeHelper.HitTest(parent,
                                             new HitTestFilterCallback(HitTestFilter),
                                             new HitTestResultCallback(HitTestCallback),
-                                            new PointHitTestParameters(mouse));
+                                            new GeometryHitTestParameters(g));
                 }
                 else
                 {
                     System.Diagnostics.Trace.WriteLine("Parent null in filter", "ERROR");
                 }
 
+                foreach (Piece p in hitTestResults)
+                {
+                    this.Snap(p, mouse);
+                    this.Connect(p);
+                }
             }
         }
 
+        /// <summary>
+        /// Filters elements that cannot have a replationship, e.g. discards non-Pieces
+        /// </summary>
+        /// <param name="obj">An element in the visual tree</param>
+        /// <returns></returns>
         private HitTestFilterBehavior HitTestFilter(DependencyObject obj)
         {
             if (this == obj)
@@ -138,14 +155,25 @@ namespace jigsaw
             }
         }
 
+        /// <summary>
+        /// Called when a valid element has been found. Creates a tab on the Piece in the direction of the found element
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
         private HitTestResultBehavior HitTestCallback(HitTestResult result)
         {
             Piece other = FindAncestor<Piece>(result.VisualHit);
             System.Diagnostics.Trace.WriteLine("hit " + other.GetValue(NameProperty), "VERBOSE");
-            this.Connect(other);
+            hitTestResults.Add(other);
             return HitTestResultBehavior.Continue;
         }
 
+        /// <summary>
+        /// Find a parent element of a given type and return the first match
+        /// </summary>
+        /// <typeparam name="T">Type of the parent</typeparam>
+        /// <param name="current">The element which parent we want to find</param>
+        /// <returns></returns>
         private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
         {
             do
@@ -160,6 +188,10 @@ namespace jigsaw
             return null;
         }
 
+        /// <summary>
+        /// Create a tab in the direction of the other piece
+        /// </summary>
+        /// <param name="other">The piece we want to lock with</param>
         private void Connect(Piece other)
         {
             if (other == null)
@@ -180,6 +212,23 @@ namespace jigsaw
             tabLocation.Y = Math.Sqrt(dsqrd) * Math.Sin(angle) + Height / 2;
 
             tab.Center = tabLocation;
+        }
+
+        private void Snap(Piece other, Point mouse)
+        {
+            double width = other.Width + Width;
+            double height = other.Height + Height;
+
+            double angle = Math.Atan2((Y + Height / 2) - (other.Y + other.Height / 2), (X + Width / 2) - (other.X + other.Width / 2));
+            
+            double r1sqrd = width * width / (4 * Math.Cos(angle) * Math.Cos(angle));
+            double r2sqrd = height * height / (4 * Math.Sin(angle) * Math.Sin(angle));
+
+            double dsqrd = Math.Min(r1sqrd, r2sqrd);
+
+            X = Math.Sqrt(dsqrd) * Math.Cos(angle) + (other.X - Width) + width / 2;
+            Y = Math.Sqrt(dsqrd) * Math.Sin(angle) + (other.Y - Height) + height / 2;
+
         }
     }
 }
