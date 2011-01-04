@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Media.Effects;
+using jigsaw.Jigsaw;
 
 
 namespace jigsaw
@@ -22,9 +23,12 @@ namespace jigsaw
     public partial class Piece : UserControl
     {
         //Dependency properties
+        public static readonly DependencyProperty TableNameProperty = DependencyProperty.Register("TableName", typeof(String), typeof(Piece));
         public static readonly DependencyProperty ColorProperty = DependencyProperty.Register("Color", typeof(Brush), typeof(Piece));
         public static readonly DependencyProperty XProperty = DependencyProperty.Register("X", typeof(double), typeof(Piece));
         public static readonly DependencyProperty YProperty = DependencyProperty.Register("Y", typeof(double), typeof(Piece));
+        public static readonly DependencyProperty DeltaXProperty = DependencyProperty.Register("DeltaX", typeof(double), typeof(Piece));
+        public static readonly DependencyProperty DeltaYProperty = DependencyProperty.Register("DeltaY", typeof(double), typeof(Piece));
 
         //Properties
         public Brush Color
@@ -60,17 +64,66 @@ namespace jigsaw
                 SetValue(YProperty, value);
             }
         }
+        public double DeltaX
+        {
+            get
+            {
+                return (double)GetValue(DeltaXProperty);
+            }
+            set
+            {
+                SetValue(DeltaXProperty, value);
+            }
+        }
+        public double DeltaY
+        {
+            get
+            {
+                return (double)GetValue(DeltaYProperty);
+            }
+            set
+            {
+                SetValue(DeltaYProperty, value);
+            }
+        }
+        public String TableName
+        {
+            get
+            {
+                return (String)GetValue(TableNameProperty);
+            }
+            set
+            {
+                SetValue(TableNameProperty, value);
+            }
+        }
+
+        //Constants
+        private const double TAB_RADIUS = 20;
 
         private static DropShadowEffect shadow = new DropShadowEffect();
         private Point startingPosition;
-        private Canvas parent;
+        private Panel parent;
         private List<Piece> hitTestResults;
+
+        private static Random random = new Random();
 
         public Piece()
         {
             InitializeComponent();
             shadow.ShadowDepth = 5;
             hitTestResults = new List<Piece>();
+
+            SolidColorBrush brush = new SolidColorBrush();
+            
+            double r, g, b;
+            double lightness = random.NextDouble() * 0.5 + 0.4; // not too dark nor too light
+            double hue = random.NextDouble() * 360.0; // full hue spectrum
+            double saturation = random.NextDouble() * 0.8 + 0.2; // not too grayish
+            HSLtoRGB(hue, saturation, lightness, out r, out g, out b);
+            brush.Color = System.Windows.Media.Color.FromRgb((byte)(r * 255.0), (byte)(g * 255.0), (byte)(b * 255.0));
+
+            Color = brush;
         }
 
         private void MouseDownHandler(object sender, MouseButtonEventArgs e)
@@ -79,14 +132,12 @@ namespace jigsaw
             el.CaptureMouse();
             
             path.Effect = shadow;
-            
-            Grid.SetZIndex(this, 1);
 
-            parent = FindAncestor<Canvas>(this);
+            parent = FindAncestor<JigsawBoard>(this);
 
             startingPosition = el.TranslatePoint(e.GetPosition(this), parent);
-            startingPosition.X -= X;
-            startingPosition.Y -= Y;
+            startingPosition.X -= DeltaX;
+            startingPosition.Y -= DeltaY;
         }
 
         private void MouseUpHandler(object sender, MouseButtonEventArgs e)
@@ -103,11 +154,14 @@ namespace jigsaw
             if (MouseButtonState.Pressed.Equals(e.LeftButton))
             {
                 Connect(null);
-                UIElement el = (UIElement)sender;
-                Point mouse = el.TranslatePoint(e.GetPosition(this), parent);
+                Point relativeToParent = e.GetPosition(parent);
+                Point relativeToThis = e.GetPosition(this);
 
-                X = mouse.X - startingPosition.X;
-                Y = mouse.Y - startingPosition.Y;
+                X = relativeToParent.X - relativeToThis.X;
+                Y = relativeToParent.Y - relativeToThis.Y;
+
+                DeltaX = relativeToParent.X - startingPosition.X;
+                DeltaY = relativeToParent.Y - startingPosition.Y;
 
                 //FIXME: don't create a clone everytime!
                 Geometry g = path.RenderedGeometry.CloneCurrentValue();
@@ -128,7 +182,7 @@ namespace jigsaw
 
                 foreach (Piece p in hitTestResults)
                 {
-                    this.Snap(p, mouse);
+                    //this.Snap(p, mouse);
                     this.Connect(p);
                 }
             }
@@ -163,7 +217,7 @@ namespace jigsaw
         private HitTestResultBehavior HitTestCallback(HitTestResult result)
         {
             Piece other = FindAncestor<Piece>(result.VisualHit);
-            System.Diagnostics.Trace.WriteLine("hit " + other.GetValue(NameProperty), "VERBOSE");
+            System.Diagnostics.Trace.WriteLine("hit " + other.GetValue(TableNameProperty), "VERBOSE");
             hitTestResults.Add(other);
             return HitTestResultBehavior.Continue;
         }
@@ -182,7 +236,7 @@ namespace jigsaw
                 {
                     return (T)current;
                 }
-                current = LogicalTreeHelper.GetParent(current);
+                current = VisualTreeHelper.GetParent(current);
             }
             while (current != null);
             return null;
@@ -192,26 +246,35 @@ namespace jigsaw
         /// Create a tab in the direction of the other piece
         /// </summary>
         /// <param name="other">The piece we want to lock with</param>
-        private void Connect(Piece other)
+        public void Connect(Piece other)
         {
             if (other == null)
             {
-                tab.Center = new Point(20, 20);
-                return;
+                path.Data = (RectangleGeometry)this.Resources["MainRectangle"];
             }
+            else
+            {
+                Geometry currentGeomtery = path.Data;
+                path.Data = CombinedGeometry.Combine(CreateTab(other), currentGeomtery, GeometryCombineMode.Union, null);
+            }
+        }
 
-            Point tabLocation = new Point();
+        private EllipseGeometry CreateTab(Piece other)
+        {
+            Point centre = new Point();
 
-            double angle = Math.Atan2(other.Y + other.Height/2 - Y - Height/2, other.X + other.Width/2 - X - Width/2);
+            double angle = Math.Atan2(other.Y + other.Height / 2 - Y - Height / 2, other.X + other.Width / 2 - X - Width / 2);
             double r1sqrd = Width * Width / (4 * Math.Cos(angle) * Math.Cos(angle));
             double r2sqrd = Height * Height / (4 * Math.Sin(angle) * Math.Sin(angle));
 
             double dsqrd = Math.Min(r1sqrd, r2sqrd);
 
-            tabLocation.X = Math.Sqrt(dsqrd) * Math.Cos(angle) + Width / 2;
-            tabLocation.Y = Math.Sqrt(dsqrd) * Math.Sin(angle) + Height / 2;
+            centre.X = Math.Sqrt(dsqrd) * Math.Cos(angle) + Width / 2;
+            centre.Y = Math.Sqrt(dsqrd) * Math.Sin(angle) + Height / 2;
 
-            tab.Center = tabLocation;
+            EllipseGeometry tab = new EllipseGeometry(centre, TAB_RADIUS, TAB_RADIUS);
+
+            return tab;
         }
 
         private void Snap(Piece other, Point mouse)
@@ -228,7 +291,68 @@ namespace jigsaw
 
             X = Math.Sqrt(dsqrd) * Math.Cos(angle) + (other.X - Width) + width / 2;
             Y = Math.Sqrt(dsqrd) * Math.Sin(angle) + (other.Y - Height) + height / 2;
+        }
 
+        private static void HSLtoRGB(double hue, double saturation, double luminance, out double red, out double green, out double blue)
+        {
+            double q;
+            double p;
+            if (luminance < 0.5)
+            {
+                q = luminance * (1.0 + saturation);
+            }
+            else
+            {
+                q = luminance + saturation - (luminance * saturation);
+            }
+            p = 2 * luminance - q;
+            double hk = hue / 360.0;
+            double tr = hk + 1.0 / 3.0;
+            double tg = hk;
+            double tb = hk - 1.0 / 3.0;
+            tr = Normalize(tr);
+            tg = Normalize(tg);
+            tb = Normalize(tb);
+            red = ComputeColor(q, p, tr);
+            green = ComputeColor(q, p, tg);
+            blue = ComputeColor(q, p, tb);
+        }
+
+        private static double ComputeColor(double q, double p, double tc)
+        {
+            if (tc < 1.0 / 6.0)
+            {
+                return p + ((q - p) * 6.0 * tc);
+            }
+            if (tc < 0.5)
+            {
+                return q;
+            }
+            if (tc < 2.0 / 3.0)
+            {
+                return p + ((q - p) * 6.0 * (2.0 / 3.0 - tc));
+            }
+            return p;
+        }
+
+        private static double Normalize(double tr)
+        {
+            if (tr < 0)
+            {
+                return tr + 1.0;
+            }
+            if (tr > 1.0)
+            {
+                return tr - 1.0;
+            }
+            return tr;
+        }
+
+        protected override Size ArrangeOverride(Size arrangeBounds)
+        {
+            Width = arrangeBounds.Width;
+            Height = arrangeBounds.Height;
+            return base.ArrangeOverride(arrangeBounds);
         }
     }
 }

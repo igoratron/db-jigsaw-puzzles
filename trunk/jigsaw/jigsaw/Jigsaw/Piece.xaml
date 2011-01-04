@@ -4,35 +4,30 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:conv="clr-namespace:jigsaw"
-             x:Name="root"
-             Canvas.Top="{Binding Path=Y, RelativeSource={RelativeSource Self}}"
-             Canvas.Left="{Binding Path=X, RelativeSource={RelativeSource Self}}">
+             x:Name="root">
+    <UserControl.RenderTransform>
+        <TranslateTransform
+            X="{Binding Path=DeltaX, ElementName=root}"
+            Y="{Binding Path=DeltaY, ElementName=root}" />
+    </UserControl.RenderTransform>
     <UserControl.Resources>
         <conv:SizeConverter x:Key="SizeConverter" />
+        <RectangleGeometry x:Key="MainRectangle">
+            <RectangleGeometry.Rect>
+                <MultiBinding Converter="{StaticResource SizeConverter}">
+                    <Binding Path="Width" ElementName="root"/>
+                    <Binding Path="Height" ElementName="root"/>
+                </MultiBinding>
+            </RectangleGeometry.Rect>
+        </RectangleGeometry>
     </UserControl.Resources>
     <Canvas>
         <Path x:Name="path" Fill ="{Binding Color, ElementName=root}" Stroke="Black" StrokeThickness="2"
               MouseDown="MouseDownHandler"
               MouseMove="MouseMoveHandler"
-              MouseUp="MouseUpHandler">
-            <Path.Data>
-                <CombinedGeometry x:Name="pathGeometry" GeometryCombineMode="Union">
-                    <CombinedGeometry.Geometry1>
-                        <EllipseGeometry x:Name="tab" RadiusX="20" RadiusY="20" Center="20,20"/>
-                    </CombinedGeometry.Geometry1>
-                    <CombinedGeometry.Geometry2>
-                        <RectangleGeometry>
-                            <RectangleGeometry.Rect>
-                                <MultiBinding Converter="{StaticResource SizeConverter}">
-                                    <Binding Path="Width" ElementName="root"/>
-                                    <Binding Path="Height" ElementName="root"/>
-                                </MultiBinding>
-                            </RectangleGeometry.Rect>
-                        </RectangleGeometry>
-                    </CombinedGeometry.Geometry2>
-                </CombinedGeometry>
-            </Path.Data>
+              MouseUp="MouseUpHandler"
+              Data="{StaticResource MainRectangle}">
         </Path>
-        <Label Content="{Binding Name, ElementName=root}"/>
+        <Label Content="{Binding TableName, ElementName=root}"/>
     </Canvas>
 </UserControl>
