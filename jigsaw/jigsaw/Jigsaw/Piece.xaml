@@ -3,31 +3,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:conv="clr-namespace:jigsaw"
-             x:Name="root">
+             xmlns:conv="clr-namespace:jigsaw">
+    
     <UserControl.RenderTransform>
         <TranslateTransform
-            X="{Binding Path=DeltaX, ElementName=root}"
-            Y="{Binding Path=DeltaY, ElementName=root}" />
+            X="{Binding Path=DeltaX, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Y="{Binding Path=DeltaY, RelativeSource={RelativeSource AncestorType=UserControl}}" />
     </UserControl.RenderTransform>
+    
     <UserControl.Resources>
         <conv:SizeConverter x:Key="SizeConverter" />
-        <RectangleGeometry x:Key="MainRectangle">
+        <RectangleGeometry x:Key="MainRectangle" RadiusX="2" RadiusY="2">
             <RectangleGeometry.Rect>
                 <MultiBinding Converter="{StaticResource SizeConverter}">
-                    <Binding Path="Width" ElementName="root"/>
-                    <Binding Path="Height" ElementName="root"/>
+                    <Binding Path="Width" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                    <Binding Path="Height" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
                 </MultiBinding>
             </RectangleGeometry.Rect>
         </RectangleGeometry>
     </UserControl.Resources>
+    
     <Canvas>
-        <Path x:Name="path" Fill ="{Binding Color, ElementName=root}" Stroke="Black" StrokeThickness="2"
+        <Path x:Name="path" Fill ="{Binding Path=Color, RelativeSource={RelativeSource AncestorType=UserControl}}" Stroke="Black" StrokeThickness="2"
               MouseDown="MouseDownHandler"
               MouseMove="MouseMoveHandler"
               MouseUp="MouseUpHandler"
               Data="{StaticResource MainRectangle}">
+            <Path.Effect>
+                <BlurEffect Radius="2"/>
+            </Path.Effect>
         </Path>
-        <Label Content="{Binding TableName, ElementName=root}"/>
+        <Label Content="{Binding Path=Name}"/>
     </Canvas>
 </UserControl>
