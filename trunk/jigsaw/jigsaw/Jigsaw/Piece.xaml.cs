@@ -114,16 +114,22 @@ namespace jigsaw
             shadow.ShadowDepth = 5;
             hitTestResults = new List<Piece>();
 
-            SolidColorBrush brush = new SolidColorBrush();
+            System.Windows.Media.Color start;
+            System.Windows.Media.Color end;
             
             double r, g, b;
             double lightness = random.NextDouble() * 0.5 + 0.4; // not too dark nor too light
             double hue = random.NextDouble() * 360.0; // full hue spectrum
             double saturation = random.NextDouble() * 0.8 + 0.2; // not too grayish
+            
             HSLtoRGB(hue, saturation, lightness, out r, out g, out b);
-            brush.Color = System.Windows.Media.Color.FromRgb((byte)(r * 255.0), (byte)(g * 255.0), (byte)(b * 255.0));
+            start = System.Windows.Media.Color.FromRgb((byte)(r * 255.0), (byte)(g * 255.0), (byte)(b * 255.0));
+            HSLtoRGB(hue, saturation, lightness - 0.1, out r, out g, out b);
+            end = System.Windows.Media.Color.FromRgb((byte)(r * 255.0), (byte)(g * 255.0), (byte)(b * 255.0));
 
-            Color = brush;
+            LinearGradientBrush gradient = new LinearGradientBrush(start, end, 90);
+
+            Color = gradient;
         }
 
         private void MouseDownHandler(object sender, MouseButtonEventArgs e)
@@ -131,8 +137,6 @@ namespace jigsaw
             UIElement el = (UIElement)sender;
             el.CaptureMouse();
             
-            path.Effect = shadow;
-
             parent = FindAncestor<JigsawBoard>(this);
 
             startingPosition = el.TranslatePoint(e.GetPosition(this), parent);
@@ -144,8 +148,6 @@ namespace jigsaw
         {
             UIElement el = (UIElement)sender;
             el.ReleaseMouseCapture();
-
-            path.Effect = null;
             Grid.SetZIndex(this, 0);
         }
 
@@ -346,6 +348,11 @@ namespace jigsaw
                 return tr - 1.0;
             }
             return tr;
+        }
+
+        protected override Size MeasureOverride(Size constraint)
+        {
+            return constraint;
         }
 
         protected override Size ArrangeOverride(Size arrangeBounds)

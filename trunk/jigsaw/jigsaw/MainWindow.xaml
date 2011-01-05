@@ -43,7 +43,7 @@
             
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <piece:Piece TableName="{Binding Path=Name}" Width="100" Height="100" />
+                    <piece:Piece/>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
