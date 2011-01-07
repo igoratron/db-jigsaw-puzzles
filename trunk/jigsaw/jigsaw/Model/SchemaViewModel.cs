@@ -10,7 +10,9 @@ namespace jigsaw.Model
 {
     class SchemaViewModel
     {
-        public ObservableCollection<Table> Schema { get; set; }
+        public ObservableCollection<Table> Schema { get; private set; }
+        private Dictionary<String, Table> StoredTables { get;  set; }
+
         public String XmlSchemaPath
         {
             set
@@ -21,7 +23,21 @@ namespace jigsaw.Model
                 {
                     if(XmlNodeType.Element.Equals(reader.NodeType) && "table".Equals(reader.Name))
                     {
-                        Schema.Add(new Table(reader.GetAttribute("name"), reader.GetAttribute("size")));
+                        Table t = new Table(reader.GetAttribute("name"), reader.GetAttribute("size"));
+                        Schema.Add(t);
+                        StoredTables.Add(t.Name, t);
+                        
+                        if (!reader.IsEmptyElement) //is made up from other tables
+                        {
+                            while (reader.Read() && !XmlNodeType.EndElement.Equals(reader.NodeType))
+                            {
+                                if (XmlNodeType.Element.Equals(reader.NodeType) && "table".Equals(reader.Name))
+                                {
+                                    //TODO: add sizes
+                                    t.From.Add(StoredTables[reader.GetAttribute("name")]);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -30,8 +46,7 @@ namespace jigsaw.Model
         public SchemaViewModel()
         {
             Schema = new ObservableCollection<Table>();
+            StoredTables = new Dictionary<string, Table>();
         }
-
-
     }
 }

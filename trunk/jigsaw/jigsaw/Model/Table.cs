@@ -22,10 +22,16 @@ namespace jigsaw.Model
             get;
             private set;
         }
+        public List<Table> From
+        {
+            get;
+            private set;
+        }
 
         public Table(String name, String size)
         {
             KeyRelations = new List<Table>();
+            From = new List<Table>();
             Size = int.Parse(size);
             Name = name;
         }
