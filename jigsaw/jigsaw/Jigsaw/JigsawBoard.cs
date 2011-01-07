@@ -20,22 +20,24 @@ namespace jigsaw.Jigsaw
             double totalHeight = 0;
 
             //calculate the sum
+            //foreach (UIElement child in Children)
+            //{
+            //    if ((child as ContentPresenter).Content is Table)
+            //    {
+            //        Table t = (child as ContentPresenter).Content as Table;
+            //        totalArea += t.Size;
+            //    }
+            //}
+
+            //ratio = availableSize.Height * availableSize.Width / totalArea;
+
             foreach (UIElement child in Children)
             {
-                if ((child as ContentPresenter).Content is Table)
-                {
-                    Table t = (child as ContentPresenter).Content as Table;
-                    totalArea += t.Size;
-                }
-            }
-
-            ratio = availableSize.Height * availableSize.Width / totalArea;
-
-            foreach (UIElement child in Children)
-            {
-                Table t = (child as ContentPresenter).Content as Table;
-                double width = Math.Sqrt(t.Size * ratio);
-                child.Measure(new Size(width, width));
+                //Table t = (child as ContentPresenter).Content as Table;
+                //double width = Math.Sqrt(t.Size * ratio);
+                
+                //child.Measure(new Size(width, width));
+                child.Measure(new Size(100, 100));
                 
                 Size childSize = child.DesiredSize;
                 totalWidth += childSize.Width;

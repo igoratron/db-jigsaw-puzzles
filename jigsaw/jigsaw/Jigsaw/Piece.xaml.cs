@@ -124,7 +124,7 @@ namespace jigsaw
             
             HSLtoRGB(hue, saturation, lightness, out r, out g, out b);
             start = System.Windows.Media.Color.FromRgb((byte)(r * 255.0), (byte)(g * 255.0), (byte)(b * 255.0));
-            HSLtoRGB(hue, saturation, lightness - 0.1, out r, out g, out b);
+            HSLtoRGB(hue, saturation, lightness - 0.2, out r, out g, out b);
             end = System.Windows.Media.Color.FromRgb((byte)(r * 255.0), (byte)(g * 255.0), (byte)(b * 255.0));
 
             LinearGradientBrush gradient = new LinearGradientBrush(start, end, 90);

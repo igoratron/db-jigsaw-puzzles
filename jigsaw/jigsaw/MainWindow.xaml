@@ -32,20 +32,38 @@
             </ListView.View>
         </ListView>
 
-        <ItemsControl Grid.Column="1"
-                      ItemsSource="{Binding}">
+        <TreeView
+            Grid.Column="1"
+            ItemsSource="{Binding}">
             
-            <ItemsControl.ItemsPanel>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate 
+                    ItemsSource="{Binding Path=From}"
+                    DataType="{x:Type model:Table}">
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TreeViewItem">
+                                <piece:Piece TableName="{Binding Name}"/>
+                                <!--<Expander Header="{Binding Name}">
+                                    <ItemsPresenter/>
+                                </Expander>-->
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TreeView.ItemContainerStyle>
+            
+            <TreeView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <board:JigsawBoard Background="DarkGray"/>
                 </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+            </TreeView.ItemsPanel>
             
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <piece:Piece/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        </TreeView>
     </Grid>
 </Window>
