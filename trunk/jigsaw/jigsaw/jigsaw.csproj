@@ -60,6 +60,9 @@
     <Compile Include="Model\Table.cs" />
     <Compile Include="TypeConverters\SizeConverter.cs" />
     <Compile Include="TypeConverters\RectConverter.cs" />
+    <Compile Include="TypeConverters\TabCenterConverter.cs" />
+    <Compile Include="TypeConverters\TableToPieceConverter.cs" />
+    <Compile Include="Utils.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

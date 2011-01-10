@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:conv="clr-namespace:jigsaw">
+             xmlns:conv="clr-namespace:jigsaw.TypeConverters">
     
     <UserControl.RenderTransform>
         <TranslateTransform
@@ -13,7 +13,8 @@
     
     <UserControl.Resources>
         <conv:SizeConverter x:Key="SizeConverter" />
-        <RectangleGeometry x:Key="MainRectangle" RadiusX="2" RadiusY="2">
+        <conv:TabCenterConverter x:Key="TabCenterConverter" />
+        <RectangleGeometry x:Key="MainRectangle" RadiusX="2" RadiusY="2" >
             <RectangleGeometry.Rect>
                 <MultiBinding Converter="{StaticResource SizeConverter}">
                     <Binding Path="Width" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
@@ -21,14 +22,25 @@
                 </MultiBinding>
             </RectangleGeometry.Rect>
         </RectangleGeometry>
+        <EllipseGeometry x:Key="Tab" x:Shared="false" RadiusX="20" RadiusY="20"/>
     </UserControl.Resources>
     
     <Canvas>
-        <Path x:Name="path" Fill ="{Binding Path=Color, RelativeSource={RelativeSource AncestorType=UserControl}}" Stroke="Black" StrokeThickness="2"
+        <Path x:Name="path"
+              Fill ="{Binding Path=Color, RelativeSource={RelativeSource AncestorType=UserControl}}"
+              Stroke="Black"
+              StrokeThickness="2"
               MouseDown="MouseDownHandler"
               MouseMove="MouseMoveHandler"
-              MouseUp="MouseUpHandler"
-              Data="{StaticResource MainRectangle}">
+              MouseUp="MouseUpHandler">
+              <!--Data="{StaticResource MainRectangle}">-->
+            <Path.Data>
+                <!--<CombinedGeometry Geometry1="{StaticResource MainRectangle}" Geometry2="{StaticResource Tab}" GeometryCombineMode="Union"/>-->
+                <GeometryGroup FillRule="Nonzero">
+                    <StaticResource ResourceKey="MainRectangle"/>
+                    <StaticResource ResourceKey="Tab"/>
+                </GeometryGroup>
+            </Path.Data>
             <Path.Effect>
                 <BlurEffect Radius="2"/>
             </Path.Effect>

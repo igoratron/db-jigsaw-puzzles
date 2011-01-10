@@ -2,9 +2,13 @@
 <db>
 	<table name="table1" size="45"/>
 	<table name="table2" size="21"/>
-	<table name="table3" size="33" foreignKey="table2"/>
+	<table name="table3" size="33">
+		<foreignKey name="table2"/>
+	</table>
 	<table name="table4" size="75"/>
-	<table name="table5" size="10" foreignKey="table1"/>
+	<table name="table5" size="10">
+		<foreignKey name="table1"/>
+	</table>
 	<table name="table2_And_table5" size="31">
 		<table name="table2"/>
 		<table name="table5"/>

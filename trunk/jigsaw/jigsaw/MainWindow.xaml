@@ -5,18 +5,20 @@
         xmlns:piece="clr-namespace:jigsaw"
         xmlns:board="clr-namespace:jigsaw.Jigsaw"
         xmlns:model="clr-namespace:jigsaw.Model"
+        xmlns:conv="clr-namespace:jigsaw.TypeConverters"
         Title="Jigsaw" SizeToContent="WidthAndHeight">
     
     <Window.Resources>
         <model:SchemaViewModel x:Key="modelInstance" XmlSchemaPath="database.xml"/>
         <ObjectDataProvider x:Key="viewModel" ObjectInstance="{StaticResource modelInstance}"/>
+        <conv:TableToPieceConverter x:Key="TableToPieceConverter"/>
     </Window.Resources>
     
     <Grid
         DataContext="{Binding Source={StaticResource viewModel}, Path=Schema}">
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="175"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         
@@ -27,13 +29,21 @@
                 <GridView>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Header="Table name"/>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=Size}" Header="Size"/>
-                    <!--<GridViewColumn DisplayMemberBinding="{Binding XPath=@foreignKey}" Header="Foreign Key"/>-->
+                    <GridViewColumn Header="Foreign Key">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding Path=ForeignKey}" DisplayMemberPath="Name" SelectedIndex="0"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>
 
         <TreeView
+            x:Name="jigsaw"
             Grid.Column="1"
+            Margin="20"
             ItemsSource="{Binding}">
             
             <TreeView.ItemTemplate>
@@ -48,7 +58,14 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="TreeViewItem">
-                                <piece:Piece TableName="{Binding Name}"/>
+                                <piece:Piece x:Name="piece"  TableName="{Binding Name}">
+                                    <piece:Piece.ForeignKeyPieces>
+                                        <MultiBinding Converter="{StaticResource TableToPieceConverter}">
+                                            <Binding Path="ForeignKey"/>
+                                            <Binding RelativeSource="{RelativeSource Self}"/>
+                                        </MultiBinding>
+                                    </piece:Piece.ForeignKeyPieces>
+                                </piece:Piece>
                                 <!--<Expander Header="{Binding Name}">
                                     <ItemsPresenter/>
                                 </Expander>-->

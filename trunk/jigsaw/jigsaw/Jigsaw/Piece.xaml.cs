@@ -5,7 +5,6 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -13,6 +12,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Media.Effects;
 using jigsaw.Jigsaw;
+using jigsaw.Model;
+using jigsaw.TypeConverters;
+
 
 
 namespace jigsaw
@@ -22,13 +24,15 @@ namespace jigsaw
     /// </summary>
     public partial class Piece : UserControl
     {
-        //Dependency properties
+        #region Dependency properties
         public static readonly DependencyProperty TableNameProperty = DependencyProperty.Register("TableName", typeof(String), typeof(Piece));
         public static readonly DependencyProperty ColorProperty = DependencyProperty.Register("Color", typeof(Brush), typeof(Piece));
         public static readonly DependencyProperty XProperty = DependencyProperty.Register("X", typeof(double), typeof(Piece));
         public static readonly DependencyProperty YProperty = DependencyProperty.Register("Y", typeof(double), typeof(Piece));
         public static readonly DependencyProperty DeltaXProperty = DependencyProperty.Register("DeltaX", typeof(double), typeof(Piece));
         public static readonly DependencyProperty DeltaYProperty = DependencyProperty.Register("DeltaY", typeof(double), typeof(Piece));
+        public static readonly DependencyProperty ForeignKeyPiecesProperty = DependencyProperty.Register("ForeignKeyPieces", typeof(List<Piece>), typeof(Piece));
+        #endregion
 
         //Properties
         public Brush Color
@@ -97,6 +101,16 @@ namespace jigsaw
                 SetValue(TableNameProperty, value);
             }
         }
+        public List<Piece> ForeignKeyPieces {
+            get
+            {
+                return (List<Piece>)GetValue(ForeignKeyPiecesProperty);
+            }
+            set
+            {
+                SetValue(ForeignKeyPiecesProperty, value);
+            }
+        }
 
         //Constants
         private const double TAB_RADIUS = 20;
@@ -107,13 +121,13 @@ namespace jigsaw
         private List<Piece> hitTestResults;
 
         private static Random random = new Random();
-
+        
         public Piece()
         {
             InitializeComponent();
             shadow.ShadowDepth = 5;
             hitTestResults = new List<Piece>();
-
+            
             System.Windows.Media.Color start;
             System.Windows.Media.Color end;
             
@@ -122,9 +136,9 @@ namespace jigsaw
             double hue = random.NextDouble() * 360.0; // full hue spectrum
             double saturation = random.NextDouble() * 0.8 + 0.2; // not too grayish
             
-            HSLtoRGB(hue, saturation, lightness, out r, out g, out b);
+            Utils.HSLtoRGB(hue, saturation, lightness, out r, out g, out b);
             start = System.Windows.Media.Color.FromRgb((byte)(r * 255.0), (byte)(g * 255.0), (byte)(b * 255.0));
-            HSLtoRGB(hue, saturation, lightness - 0.2, out r, out g, out b);
+            Utils.HSLtoRGB(hue, saturation, lightness - 0.15, out r, out g, out b);
             end = System.Windows.Media.Color.FromRgb((byte)(r * 255.0), (byte)(g * 255.0), (byte)(b * 255.0));
 
             LinearGradientBrush gradient = new LinearGradientBrush(start, end, 90);
@@ -137,7 +151,7 @@ namespace jigsaw
             UIElement el = (UIElement)sender;
             el.CaptureMouse();
             
-            parent = FindAncestor<JigsawBoard>(this);
+            parent = Utils.FindAncestor<JigsawBoard>(this);
 
             startingPosition = el.TranslatePoint(e.GetPosition(this), parent);
             startingPosition.X -= DeltaX;
@@ -148,7 +162,7 @@ namespace jigsaw
         {
             UIElement el = (UIElement)sender;
             el.ReleaseMouseCapture();
-            Grid.SetZIndex(this, 0);
+            Panel.SetZIndex(this, 0);
         }
 
         private void MouseMoveHandler(object sender, MouseEventArgs e)
@@ -190,6 +204,22 @@ namespace jigsaw
             }
         }
 
+        private static void ForeignKeyChangedHandler(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
+            //if (args != null && ((List<Table>)args.NewValue).Count > 0) 
+            //{
+            //    TreeView itemsControl = FindAncestor<TreeView>(obj);
+            //    List<Table> foreignKey = (List<Table>)args.NewValue;
+            //    foreach (Table t in foreignKey)
+            //    {
+            //        TreeViewItem templateParent = (TreeViewItem)itemsControl.ItemContainerGenerator.ContainerFromItem(t);
+            //        Piece p = (Piece)templateParent.Template.FindName("piece", templateParent);
+            //        System.Diagnostics.Debug.Assert(p != null);
+            //  //      ((Piece)obj).Connect(p);
+            //    }
+            //}
+        }
+
         /// <summary>
         /// Filters elements that cannot have a replationship, e.g. discards non-Pieces
         /// </summary>
@@ -218,37 +248,17 @@ namespace jigsaw
         /// <returns></returns>
         private HitTestResultBehavior HitTestCallback(HitTestResult result)
         {
-            Piece other = FindAncestor<Piece>(result.VisualHit);
+            Piece other = Utils.FindAncestor<Piece>(result.VisualHit);
             System.Diagnostics.Trace.WriteLine("hit " + other.GetValue(TableNameProperty), "VERBOSE");
             hitTestResults.Add(other);
             return HitTestResultBehavior.Continue;
         }
 
         /// <summary>
-        /// Find a parent element of a given type and return the first match
-        /// </summary>
-        /// <typeparam name="T">Type of the parent</typeparam>
-        /// <param name="current">The element which parent we want to find</param>
-        /// <returns></returns>
-        private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
-        {
-            do
-            {
-                if (current is T)
-                {
-                    return (T)current;
-                }
-                current = VisualTreeHelper.GetParent(current);
-            }
-            while (current != null);
-            return null;
-        }
-
-        /// <summary>
         /// Create a tab in the direction of the other piece
         /// </summary>
         /// <param name="other">The piece we want to lock with</param>
-        public void Connect(Piece other)
+        private void Connect(Piece other)
         {
             if (other == null)
             {
@@ -256,25 +266,62 @@ namespace jigsaw
             }
             else
             {
+                System.Diagnostics.Debug.WriteLine("Connecting {0} with {1}", this.TableName, other.TableName);
                 Geometry currentGeomtery = path.Data;
-                path.Data = CombinedGeometry.Combine(CreateTab(other), currentGeomtery, GeometryCombineMode.Union, null);
+                
+                //FIXME: get rid of this hack! It appears that at this stage rectangle is not yet bound to Width and Height thus
+                //thus the rectangle does not have any area -> combinegeometry discards it!
+                RectangleGeometry rectangle = (RectangleGeometry)this.Resources["MainRectangle"];
+                rectangle.Rect = new Rect(new Size(Width, Height));                
+                
+                EllipseGeometry ellipse = (EllipseGeometry)this.Resources["Tab"];
+
+                Binding thisPiece = new Binding();
+                thisPiece.Source = this;
+
+                Binding otherPiece = new Binding();
+                otherPiece.Source = other;
+
+                MultiBinding binding = new MultiBinding();
+                binding.Bindings.Add(thisPiece);
+                binding.Bindings.Add(otherPiece);
+                binding.Converter = new TabCenterConverter();
+
+                BindingOperations.SetBinding(ellipse, EllipseGeometry.CenterProperty, binding);
+
+                path.Data = CombinedGeometry.Combine(rectangle, ellipse, GeometryCombineMode.Union, null);
+            }
+        }
+
+        private void Reconnect()
+        {
+            Connect(null);
+            if (ForeignKeyPieces != null)
+            {
+                foreach (Piece p in ForeignKeyPieces)
+                {
+                    Connect(p);
+                }
             }
         }
 
         private EllipseGeometry CreateTab(Piece other)
         {
-            Point centre = new Point();
 
-            double angle = Math.Atan2(other.Y + other.Height / 2 - Y - Height / 2, other.X + other.Width / 2 - X - Width / 2);
-            double r1sqrd = Width * Width / (4 * Math.Cos(angle) * Math.Cos(angle));
-            double r2sqrd = Height * Height / (4 * Math.Sin(angle) * Math.Sin(angle));
+            EllipseGeometry tab = (EllipseGeometry)this.Resources["Tab"];
+            //Point centre = new Point();
+            
+            //double angle = Math.Atan2(other.Y + other.Height / 2 - Y - Height / 2, other.X + other.Width / 2 - X - Width / 2);
+            //System.Diagnostics.Debug.Assert(!double.IsNaN(angle));
+            //double r1sqrd = Width * Width / (4 * Math.Cos(angle) * Math.Cos(angle));
+            //double r2sqrd = Height * Height / (4 * Math.Sin(angle) * Math.Sin(angle));
 
-            double dsqrd = Math.Min(r1sqrd, r2sqrd);
+            //double dsqrd = Math.Min(r1sqrd, r2sqrd);
 
-            centre.X = Math.Sqrt(dsqrd) * Math.Cos(angle) + Width / 2;
-            centre.Y = Math.Sqrt(dsqrd) * Math.Sin(angle) + Height / 2;
+            //centre.X = Math.Sqrt(dsqrd) * Math.Cos(angle) + Width / 2;
+            //centre.Y = Math.Sqrt(dsqrd) * Math.Sin(angle) + Height / 2;
 
-            EllipseGeometry tab = new EllipseGeometry(centre, TAB_RADIUS, TAB_RADIUS);
+            //EllipseGeometry tab = new EllipseGeometry(centre, TAB_RADIUS, TAB_RADIUS);
 
             return tab;
         }
@@ -295,61 +342,6 @@ namespace jigsaw
             Y = Math.Sqrt(dsqrd) * Math.Sin(angle) + (other.Y - Height) + height / 2;
         }
 
-        private static void HSLtoRGB(double hue, double saturation, double luminance, out double red, out double green, out double blue)
-        {
-            double q;
-            double p;
-            if (luminance < 0.5)
-            {
-                q = luminance * (1.0 + saturation);
-            }
-            else
-            {
-                q = luminance + saturation - (luminance * saturation);
-            }
-            p = 2 * luminance - q;
-            double hk = hue / 360.0;
-            double tr = hk + 1.0 / 3.0;
-            double tg = hk;
-            double tb = hk - 1.0 / 3.0;
-            tr = Normalize(tr);
-            tg = Normalize(tg);
-            tb = Normalize(tb);
-            red = ComputeColor(q, p, tr);
-            green = ComputeColor(q, p, tg);
-            blue = ComputeColor(q, p, tb);
-        }
-
-        private static double ComputeColor(double q, double p, double tc)
-        {
-            if (tc < 1.0 / 6.0)
-            {
-                return p + ((q - p) * 6.0 * tc);
-            }
-            if (tc < 0.5)
-            {
-                return q;
-            }
-            if (tc < 2.0 / 3.0)
-            {
-                return p + ((q - p) * 6.0 * (2.0 / 3.0 - tc));
-            }
-            return p;
-        }
-
-        private static double Normalize(double tr)
-        {
-            if (tr < 0)
-            {
-                return tr + 1.0;
-            }
-            if (tr > 1.0)
-            {
-                return tr - 1.0;
-            }
-            return tr;
-        }
-
         protected override Size MeasureOverride(Size constraint)
         {
             return constraint;
@@ -359,7 +351,9 @@ namespace jigsaw
         {
             Width = arrangeBounds.Width;
             Height = arrangeBounds.Height;
+            Reconnect();
             return base.ArrangeOverride(arrangeBounds);
         }
     }
 }
+//
