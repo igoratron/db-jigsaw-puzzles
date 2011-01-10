@@ -5,7 +5,7 @@ using System.Text;
 
 namespace jigsaw.Model
 {
-    class Table
+    public class Table
     {
         public String Name
         {
@@ -17,7 +17,7 @@ namespace jigsaw.Model
             get;
             set;
         }
-        public List<Table> KeyRelations
+        public List<Table> ForeignKey
         {
             get;
             private set;
@@ -30,7 +30,7 @@ namespace jigsaw.Model
 
         public Table(String name, String size)
         {
-            KeyRelations = new List<Table>();
+            ForeignKey = new List<Table>();
             From = new List<Table>();
             Size = int.Parse(size);
             Name = name;

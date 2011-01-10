@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Data;
 using System.Windows;
 
-namespace jigsaw
+namespace jigsaw.TypeConverters
 {
     class RectConverter : IValueConverter
     {

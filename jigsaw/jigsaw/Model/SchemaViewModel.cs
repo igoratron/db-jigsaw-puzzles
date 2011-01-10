@@ -17,8 +17,8 @@ namespace jigsaw.Model
         {
             set
             {
+                //parse
                 XmlTextReader reader = new XmlTextReader("../../" + value);
-                reader.Read();
                 while (reader.Read())
                 {
                     if(XmlNodeType.Element.Equals(reader.NodeType) && "table".Equals(reader.Name))
@@ -34,10 +34,26 @@ namespace jigsaw.Model
                                 if (XmlNodeType.Element.Equals(reader.NodeType) && "table".Equals(reader.Name))
                                 {
                                     //TODO: add sizes
+                                    //TODO: what if encountered a table that is not in Stored tables?
                                     t.From.Add(StoredTables[reader.GetAttribute("name")]);
+                                }
+                                else if (XmlNodeType.Element.Equals(reader.NodeType) && "foreignKey".Equals(reader.Name))
+                                {
+                                    t.ForeignKey.Add(StoredTables[reader.GetAttribute("name")]);
                                 }
                             }
                         }
+                    }
+                }
+
+                //reorder
+                for(int i = 0; i < Schema.Count; i++)
+                {
+                    Table t = Schema[i];
+                    if (t.ForeignKey.Count != 0)
+                    {
+                        Schema.RemoveAt(i);
+                        Schema.Insert(Schema.IndexOf(t.ForeignKey[0])+1, t);
                     }
                 }
             }
