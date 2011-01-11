@@ -151,7 +151,8 @@ namespace jigsaw
             UIElement el = (UIElement)sender;
             el.CaptureMouse();
             
-            parent = Utils.FindAncestor<JigsawBoard>(this);
+            //parent = Utils.FindAncestor<JigsawBoard>(this);
+            parent = Utils.FindAncestor<ForceDirectedPanel>(this);
 
             startingPosition = el.TranslatePoint(e.GetPosition(this), parent);
             startingPosition.X -= DeltaX;

@@ -19,7 +19,7 @@ namespace jigsaw.TypeConverters
                 Point centre = new Point();
 
                 double angle = Math.Atan2(otherPiece.Y + otherPiece.Height / 2 - thisPiece.Y - thisPiece.Height / 2, otherPiece.X + otherPiece.Width / 2 - thisPiece.X - thisPiece.Width / 2);
-                System.Diagnostics.Debug.Assert(!double.IsNaN(angle));
+                System.Diagnostics.Debug.Assert(!double.IsNaN(angle), "Angle is NAN");
                 double r1sqrd = thisPiece.Width * thisPiece.Width / (4 * Math.Cos(angle) * Math.Cos(angle));
                 double r2sqrd = thisPiece.Height * thisPiece.Height / (4 * Math.Sin(angle) * Math.Sin(angle));
 

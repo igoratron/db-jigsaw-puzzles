@@ -12,25 +12,26 @@ namespace jigsaw.TypeConverters
     {
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
+            List<Piece> result = new List<Piece>();
+
             if (values.Length == 2)
             {
                 List<Table> tables = (List<Table>)values[0];
                 if (tables.Count > 0)
                 {
-                    List<Piece> result = new List<Piece>();
                     Piece piece = (Piece)values[1];
                     TreeView itemsControl = Utils.FindAncestor<TreeView>(piece);
                     foreach (Table t in tables)
                     {
                         TreeViewItem templateParent = (TreeViewItem)itemsControl.ItemContainerGenerator.ContainerFromItem(t);
                         Piece p = (Piece)templateParent.Template.FindName("piece", templateParent);
-                        System.Diagnostics.Debug.Assert(p != null);
+                        System.Diagnostics.Debug.Assert(p != null,"Unable to find a Piece for given Table");
                         result.Add(p);
                     }
-                    return result;
                 }
             }
-            return null;
+
+            return result;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)

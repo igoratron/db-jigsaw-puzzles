@@ -58,7 +58,10 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="TreeViewItem">
-                                <piece:Piece x:Name="piece"  TableName="{Binding Name}">
+                                <piece:Piece x:Name="piece"
+                                             TableName="{Binding Name}"
+                                             X="{Binding Path=(board:JigsawBoard.X), RelativeSource={RelativeSource Self}}"
+                                             Y="{Binding Path=(board:JigsawBoard.Y), RelativeSource={RelativeSource Self}}">
                                     <piece:Piece.ForeignKeyPieces>
                                         <MultiBinding Converter="{StaticResource TableToPieceConverter}">
                                             <Binding Path="ForeignKey"/>
@@ -77,7 +80,8 @@
             
             <TreeView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <board:JigsawBoard Background="DarkGray"/>
+                    <!--<board:JigsawBoard Background="DarkGray"/>-->
+                    <board:ForceDirectedPanel Background="LightGray"/>
                 </ItemsPanelTemplate>
             </TreeView.ItemsPanel>
             
