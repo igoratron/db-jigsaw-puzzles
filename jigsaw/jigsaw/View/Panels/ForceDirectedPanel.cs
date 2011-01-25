@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows;
 using jigsaw.Model;
+using jigsaw.View.Jigsaw;
 
 namespace jigsaw.Jigsaw.View.Panels
 {

@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Data;
 using jigsaw.Model;
 using System.Windows.Controls;
+using jigsaw.View.Jigsaw;
 
 namespace jigsaw.TypeConverters
 {

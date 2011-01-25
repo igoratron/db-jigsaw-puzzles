@@ -16,9 +16,7 @@ using jigsaw.Model;
 using jigsaw.TypeConverters;
 using jigsaw.Jigsaw.View.Panels;
 
-
-
-namespace jigsaw
+namespace jigsaw.View.Jigsaw
 {
     /// <summary>
     /// Interaction logic for Piece.xaml
