@@ -8,6 +8,7 @@ using System.Xml;
 using jigsaw.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using jigsaw.View.Jigsaw;
 
 namespace jigsaw.Jigsaw.View.Panels
 {

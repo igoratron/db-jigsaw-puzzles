@@ -55,7 +55,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="View\Jigsaw\PieceItem.cs" />
     <Compile Include="View\Panels\ForceDirectedPanel.cs" />
     <Compile Include="View\Panels\JigsawBoard.cs" />
     <Compile Include="View\Panels\Vector.cs" />
