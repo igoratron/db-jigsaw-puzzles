@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Name="window"
         xmlns:piece="clr-namespace:jigsaw"
-        xmlns:board="clr-namespace:jigsaw.Jigsaw"
+        xmlns:panels="clr-namespace:jigsaw.Jigsaw.View.Panels"
         xmlns:model="clr-namespace:jigsaw.Model"
         xmlns:conv="clr-namespace:jigsaw.TypeConverters"
         Title="Jigsaw" SizeToContent="WidthAndHeight">
@@ -36,11 +36,25 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    <GridViewColumn Header="From">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding Path=From}" DisplayMemberPath="Name" SelectedIndex="0"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>
 
-        <TreeView
+        <!--<board:JigsawBoard
+            x:Name="jigsaw"
+            Grid.Column="1"
+            Margin="20"
+            ItemsSource="{Binding}">
+        </board:JigsawBoard>-->
+
+        <TreeView 
             x:Name="jigsaw"
             Grid.Column="1"
             Margin="20"
@@ -50,41 +64,53 @@
                 <HierarchicalDataTemplate 
                     ItemsSource="{Binding Path=From}"
                     DataType="{x:Type model:Table}">
+                    <Expander Header="{Binding Name}">
+                        <ItemsPresenter/>
+                    </Expander>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
+
+            <!--<TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TreeViewItem">
+                                
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TreeView.ItemContainerStyle>-->
 
             <TreeView.ItemContainerStyle>
                 <Style TargetType="TreeViewItem">
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="TreeViewItem">
-                                <piece:Piece x:Name="piece"
-                                             TableName="{Binding Name}"
-                                             X="{Binding Path=(board:JigsawBoard.X), RelativeSource={RelativeSource Self}}"
-                                             Y="{Binding Path=(board:JigsawBoard.Y), RelativeSource={RelativeSource Self}}">
-                                    <piece:Piece.ForeignKeyPieces>
-                                        <MultiBinding Converter="{StaticResource TableToPieceConverter}">
-                                            <Binding Path="ForeignKey"/>
-                                            <Binding RelativeSource="{RelativeSource Self}"/>
-                                        </MultiBinding>
-                                    </piece:Piece.ForeignKeyPieces>
+                                    <piece:Piece x:Name="piece"
+                                                 TableName="{Binding Name}"
+                                                 X="{Binding Path=(panels:JigsawBoard.X), RelativeSource={RelativeSource Self}}"
+                                                 Y="{Binding Path=(panels:JigsawBoard.Y), RelativeSource={RelativeSource Self}}">
+                                        <piece:Piece.ForeignKeyPieces>
+                                            <MultiBinding Converter="{StaticResource TableToPieceConverter}">
+                                                <Binding Path="ForeignKey"/>
+                                                <Binding RelativeSource="{RelativeSource Self}"/>
+                                            </MultiBinding>
+                                        </piece:Piece.ForeignKeyPieces>
                                 </piece:Piece>
-                                <!--<Expander Header="{Binding Name}">
-                                    <ItemsPresenter/>
-                                </Expander>-->
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
                 </Style>
             </TreeView.ItemContainerStyle>
-            
+
             <TreeView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <!--<board:JigsawBoard Background="DarkGray"/>-->
-                    <board:ForceDirectedPanel Background="LightGray"/>
+                    <panels:ForceDirectedPanel Background="LightGray"/>
+                    <!--<StackPanel/>-->
                 </ItemsPanelTemplate>
             </TreeView.ItemsPanel>
-            
         </TreeView>
     </Grid>
 </Window>
