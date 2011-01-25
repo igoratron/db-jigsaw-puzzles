@@ -8,6 +8,7 @@
 	<table name="table4" size="75"/>
 	<table name="table5" size="10">
 		<foreignKey name="table1"/>
+		<foreignKey name="table3"/>
 	</table>
 	<table name="table2_And_table5" size="31">
 		<table name="table2"/>

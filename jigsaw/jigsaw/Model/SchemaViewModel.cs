@@ -45,17 +45,6 @@ namespace jigsaw.Model
                         }
                     }
                 }
-
-                //reorder
-                for(int i = 0; i < Schema.Count; i++)
-                {
-                    Table t = Schema[i];
-                    if (t.ForeignKey.Count != 0)
-                    {
-                        Schema.RemoveAt(i);
-                        Schema.Insert(Schema.IndexOf(t.ForeignKey[0])+1, t);
-                    }
-                }
             }
         }
 

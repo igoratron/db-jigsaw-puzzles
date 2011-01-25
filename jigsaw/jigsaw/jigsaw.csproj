@@ -55,9 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Jigsaw\ForceDirectedPanel.cs" />
-    <Compile Include="Jigsaw\JigsawBoard.cs" />
-    <Compile Include="Jigsaw\Vector.cs" />
+    <Compile Include="View\Jigsaw\PieceItem.cs" />
+    <Compile Include="View\Panels\ForceDirectedPanel.cs" />
+    <Compile Include="View\Panels\JigsawBoard.cs" />
+    <Compile Include="View\Panels\Vector.cs" />
     <Compile Include="Model\SchemaViewModel.cs" />
     <Compile Include="Model\Table.cs" />
     <Compile Include="TypeConverters\SizeConverter.cs" />
@@ -77,13 +78,13 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Jigsaw\Piece.xaml">
+    <Page Include="View\Jigsaw\Piece.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Jigsaw\Piece.xaml.cs">
+    <Compile Include="View\Jigsaw\Piece.xaml.cs">
       <DependentUpon>Piece.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">

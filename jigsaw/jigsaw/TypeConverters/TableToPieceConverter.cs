@@ -25,7 +25,7 @@ namespace jigsaw.TypeConverters
                     {
                         TreeViewItem templateParent = (TreeViewItem)itemsControl.ItemContainerGenerator.ContainerFromItem(t);
                         Piece p = (Piece)templateParent.Template.FindName("piece", templateParent);
-                        System.Diagnostics.Debug.Assert(p != null,"Unable to find a Piece for given Table");
+                        System.Diagnostics.Debug.Assert(p != null, "Unable to find a Piece for given Table");
                         result.Add(p);
                     }
                 }
