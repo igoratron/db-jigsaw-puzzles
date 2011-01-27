@@ -57,24 +57,33 @@
             </Style.Triggers>
         </Style>
     </UserControl.Style>
+    
+    <UserControl.ContentTemplate>
+        <HierarchicalDataTemplate>
+            <ItemsPresenter/>
+        </HierarchicalDataTemplate>
+    </UserControl.ContentTemplate>
+    
+    <UserControl.Template>
+        <ControlTemplate>
+            <Canvas>
+                <Path x:Name="path"
+                    Fill ="{Binding Path=Color, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Stroke="Black"
+                    StrokeThickness="2"
+                    MouseDown="MouseDownHandler"
+                    MouseMove="MouseMoveHandler"
+                    MouseUp="MouseUpHandler">
 
-    <Canvas>
-        <Path x:Name="path"
-              Fill ="{Binding Path=Color, RelativeSource={RelativeSource AncestorType=UserControl}}"
-              Stroke="Black"
-              StrokeThickness="2"
-              MouseDown="MouseDownHandler"
-              MouseMove="MouseMoveHandler"
-              MouseUp="MouseUpHandler">
-              <!--Data="{StaticResource MainRectangle}">-->
-            <Path.Data>
-                <CombinedGeometry x:Name="shape" Geometry1="{StaticResource MainRectangle}" Geometry2="{StaticResource Tab}" GeometryCombineMode="Union"/>
-            </Path.Data>
-            <Path.Effect>
-                <BlurEffect Radius="2"/>
-            </Path.Effect>
-        </Path>
-        <Label Content="{Binding Path=Name}"/>
-        <ItemsPresenter x:Name="itemsPresenter" Visibility="Visible"/>
-    </Canvas>
+                    <Path.Data>
+                        <CombinedGeometry x:Name="shape" Geometry1="{StaticResource MainRectangle}" Geometry2="{StaticResource Tab}" GeometryCombineMode="Union"/>
+                    </Path.Data>
+                    <Path.Effect>
+                        <BlurEffect Radius="2"/>
+                    </Path.Effect>
+                </Path>
+                <Label Content="{Binding Path=Name}"/>
+            </Canvas>
+        </ControlTemplate>
+    </UserControl.Template>
 </UserControl>
