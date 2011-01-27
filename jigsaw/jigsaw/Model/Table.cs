@@ -36,5 +36,10 @@ namespace jigsaw.Model
             Size = int.Parse(size);
             Name = name;
         }
+
+        public override string ToString()
+        {
+            return String.Format("Table = {0}", Name);
+        }
     }
 }

@@ -223,6 +223,7 @@ namespace jigsaw.View.Jigsaw
                 DeltaY = relativeToParent.Y - startingPosition.Y;
 
                 //FIXME: don't create a clone everytime!
+                Path path = (Path)this.Template.FindName("path", this);
                 Geometry g = path.RenderedGeometry.CloneCurrentValue();
                 g.Transform = new TranslateTransform(X, Y);
 
@@ -287,6 +288,9 @@ namespace jigsaw.View.Jigsaw
         /// <param name="other">The piece we want to lock with</param>
         private void Connect(Piece other)
         {
+            Path path = (Path) this.Template.FindName("path", this);
+            CombinedGeometry shape = (CombinedGeometry)this.Template.FindName("shape", this);
+
             if (other == null)
             {
                 path.Data = (RectangleGeometry)this.Resources["MainRectangle"];

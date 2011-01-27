@@ -10,48 +10,165 @@ namespace jigsaw.Model
 {
     class SchemaViewModel
     {
-        public ObservableCollection<Table> Schema { get; private set; }
-        private Dictionary<String, Table> StoredTables { get;  set; }
+        public ObservableCollection<ObservableCollection<Table>> Schema { get; private set; }
+
+        private const String TABLE = "table";
+        private const String F_KEY = "foreignKey";
+        private const String NAME = "name";
+        private const String SIZE = "size";
 
         public String XmlSchemaPath
         {
             set
             {
-                //parse
-                XmlTextReader reader = new XmlTextReader("../../" + value);
-                while (reader.Read())
+                String path = "../../" + value;
+                Schema = Reorder(ParseXML(path));
+            }
+        }
+
+        public SchemaViewModel()
+        {
+            Schema = new ObservableCollection<ObservableCollection<Table>>();
+        }
+
+        /// <summary>
+        /// Takes in a XML file and outputs a coresponding list with tables
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private Dictionary<string, Table> ParseXML(String path)
+        {
+            Dictionary<string, Table> instantiated = new Dictionary<string, Table>();
+            Dictionary<Table, List<String>> foreignNames = new Dictionary<Table, List<string>>();
+            Dictionary<Table, List<String>> fromNames = new Dictionary<Table, List<string>>();
+
+            XmlTextReader reader = new XmlTextReader(path);
+            while (reader.Read())
+            {
+                if (XmlNodeType.Element.Equals(reader.NodeType) && TABLE.Equals(reader.Name))
                 {
-                    if(XmlNodeType.Element.Equals(reader.NodeType) && "table".Equals(reader.Name))
+                    Table t = new Table(reader.GetAttribute(NAME), reader.GetAttribute(SIZE));
+                    instantiated.Add(t.Name, t);
+
+                    if (!reader.IsEmptyElement) //is made up from other tables
                     {
-                        Table t = new Table(reader.GetAttribute("name"), reader.GetAttribute("size"));
-                        Schema.Add(t);
-                        StoredTables.Add(t.Name, t);
-                        
-                        if (!reader.IsEmptyElement) //is made up from other tables
+                        while (reader.Read() && !XmlNodeType.EndElement.Equals(reader.NodeType))
                         {
-                            while (reader.Read() && !XmlNodeType.EndElement.Equals(reader.NodeType))
+                            if (XmlNodeType.Element.Equals(reader.NodeType) && TABLE.Equals(reader.Name))
                             {
-                                if (XmlNodeType.Element.Equals(reader.NodeType) && "table".Equals(reader.Name))
+                                String fromName = reader.GetAttribute(NAME);
+                                if (!fromNames.ContainsKey(t))
                                 {
-                                    //TODO: add sizes
-                                    //TODO: what if encountered a table that is not in Stored tables?
-                                    t.From.Add(StoredTables[reader.GetAttribute("name")]);
+                                    fromNames.Add(t,new List<string>());
                                 }
-                                else if (XmlNodeType.Element.Equals(reader.NodeType) && "foreignKey".Equals(reader.Name))
+                                fromNames[t].Add(fromName);
+                                    
+                            }
+                            else if (XmlNodeType.Element.Equals(reader.NodeType) && F_KEY.Equals(reader.Name))
+                            {
+                                String foreignName = reader.GetAttribute(NAME);
+
+                                if (!foreignNames.ContainsKey(t))
                                 {
-                                    t.ForeignKey.Add(StoredTables[reader.GetAttribute("name")]);
+                                    foreignNames.Add(t, new List<string>());
+                                }
+
+                                foreignNames[t].Add(foreignName);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //convert string names into table objects
+            foreach (Table t in foreignNames.Keys)
+            {
+                foreach(String tableName in foreignNames[t]) 
+                {
+                    t.ForeignKey.Add(instantiated[tableName]);
+                }
+            }
+
+            foreach (Table t in fromNames.Keys)
+            {
+                foreach (String tableName in fromNames[t])
+                {
+                    t.From.Add(instantiated[tableName]);
+                }
+            }
+
+            return instantiated;
+        }
+
+        /// <summary>
+        /// Reorders elements so that they are grouped by the foreignKey Tables (foreignKey on top)
+        /// </summary>
+        /// <param name="tables"></param>
+        /// <returns></returns>
+        private ObservableCollection<ObservableCollection<Table>> Reorder(Dictionary<string, Table> tables)
+        {
+            ObservableCollection<ObservableCollection<Table>> result = new ObservableCollection<ObservableCollection<Table>>();
+            /// <summary>
+            /// Maps Tables to integers in the resulting list;
+            /// </summary>
+            Dictionary<Table, int> _map = new Dictionary<Table, int>();
+
+            foreach (Table t in tables.Values)
+            {
+                if (!_map.ContainsKey(t))
+                {
+                    _map.Add(t, result.Count);
+                    result.Add(new ObservableCollection<Table>());
+                }
+                result[_map[t]].Add(t);
+                
+                if (t.ForeignKey.Count > 0)
+                {
+                    foreach (Table foreignTable in t.ForeignKey)
+                    {
+                        if (!_map.ContainsKey(foreignTable))
+                        {
+                            _map.Add(foreignTable, result.Count - 1);
+                            result[_map[foreignTable]].Add(t);
+                        }
+                        else
+                        {
+                            //copy all tables from the resuls collection to the new "bucket"
+                            //and update all entires in the map to point to the new "bucket"
+
+                            foreach(Table existing in result[_map[foreignTable]]) 
+                            {
+                                result[result.Count - 1].Add(existing);
+                            }
+
+                            //cant remove or the map will get all messed up. Remove later
+                            result[_map[foreignTable]] = null;
+
+                            //update all entires pointing to this 
+                            int currentIndex = _map[foreignTable];
+                            for(int i = 0; i < _map.Count; i++)
+                            {
+                                KeyValuePair<Table, int> entry = _map.ElementAt(i);
+                                if (entry.Value == currentIndex)
+                                {
+                                    _map[entry.Key] = result.Count - 1; 
                                 }
                             }
                         }
                     }
                 }
             }
-        }
 
-        public SchemaViewModel()
-        {
-            Schema = new ObservableCollection<Table>();
-            StoredTables = new Dictionary<string, Table>();
+            //remove all elements that have been put into some other group
+            for(int i = result.Count - 1; i >= 0; i--) 
+            {
+                if (result[i] == null)
+                {
+                    result.RemoveAt(i);
+                }
+            }
+
+            return result;
         }
     }
 }
