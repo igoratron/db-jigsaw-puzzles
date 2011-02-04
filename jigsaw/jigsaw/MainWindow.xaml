@@ -6,147 +6,125 @@
         xmlns:panels="clr-namespace:jigsaw.Jigsaw.View.Panels"
         xmlns:model="clr-namespace:jigsaw.Model"
         xmlns:conv="clr-namespace:jigsaw.TypeConverters"
-        Title="Jigsaw" SizeToContent="WidthAndHeight">
+        WindowStartupLocation="CenterScreen"
+        Title="Jigsaw" Width="800" Height="600">
     
     <Window.Resources>
         <model:SchemaViewModel x:Key="modelInstance" XmlSchemaPath="database.xml"/>
         <ObjectDataProvider x:Key="viewModel" ObjectInstance="{StaticResource modelInstance}"/>
         <conv:TableToPieceConverter x:Key="TableToPieceConverter"/>
+        <piece:JigsawStyleSelector x:Key="JigsawStyleSelector"/>
     </Window.Resources>
     
     <Grid
         DataContext="{Binding Source={StaticResource viewModel}, Path=Schema}">
-        
+                
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        
+        <Grid.Resources>
+            <!--applied to the collection element-->
+            <Style x:Key="panelStyle">
+                <Setter Property="TreeViewItem.Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <ItemsPresenter/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="TreeViewItem.ItemsPanel">
+                    <Setter.Value>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="TreeViewItem.IsExpanded" Value="True"/>
+            </Style>
+
+            <!--applied to table-->
+            <Style x:Key="pieceStyle">
+                <Setter Property="TreeViewItem.Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <Expander Header="{Binding Name}">
+                                <ItemsPresenter Margin="10,0,0,0"/>
+                            </Expander>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
 
         <TreeView
             Grid.Column="0"
             ItemsSource="{Binding}">
             
             <TreeView.Resources>
-                <HierarchicalDataTemplate
-                    x:Key="tableTemplate"
-                    ItemsSource="{Binding From}">
-                    <TextBlock Text="{Binding Name}"/>
-                </HierarchicalDataTemplate>
-            </TreeView.Resources>
-         
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate
-                    ItemsSource="{Binding}"
-                    ItemTemplate="{StaticResource tableTemplate}">
-                    <TextBlock Text="{Binding}"/>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>            
-            
-        </TreeView>
-
-        <TreeView
-            Grid.Column="1"
-            ItemsSource="{Binding}">
-            <TreeView.Resources>
                 <Style TargetType="{x:Type TreeViewItem}">
-                    <Setter Property="ItemsPanel">
-                        <Setter.Value>
-                            <ItemsPanelTemplate>
-                                <!--<panels:ForceDirectedPanel/>-->
-                                <WrapPanel/>
-                            </ItemsPanelTemplate>
-                        </Setter.Value>
-                    </Setter>
                     <Setter Property="IsExpanded" Value="True"/>
                 </Style>
-                
-                <HierarchicalDataTemplate
-                    x:Key="tableTemplate"
-                    ItemsSource="{Binding From}">
-                    
-                    <piece:Piece x:Name="piece"
-                                     TableName="{Binding Name}"
-                                     X="{Binding Path=(panels:JigsawBoard.X), RelativeSource={RelativeSource Self}}"
-                                     Y="{Binding Path=(panels:JigsawBoard.Y), RelativeSource={RelativeSource Self}}">
-
-                        <piece:Piece.ForeignKeyPieces>
-                            <MultiBinding Converter="{StaticResource TableToPieceConverter}">
-                                <Binding Path="ForeignKey"/>
-                                <Binding RelativeSource="{RelativeSource Self}"/>
-                            </MultiBinding>
-                        </piece:Piece.ForeignKeyPieces>
-                    </piece:Piece>
-                    
-                </HierarchicalDataTemplate>
-            </TreeView.Resources>
-
+            </TreeView.Resources>         
+            
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate
-                    ItemsSource="{Binding}"
-                    ItemTemplate="{StaticResource tableTemplate}">
+                <HierarchicalDataTemplate ItemsSource="{Binding}">
+                    <HierarchicalDataTemplate.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Path=From}">
+                            <TextBlock Text="{Binding Name}"/>
+                        </HierarchicalDataTemplate>
+                    </HierarchicalDataTemplate.ItemTemplate>
                     <TextBlock Text="{Binding}"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
             
-            <!--<TreeView.Template>
-                <ControlTemplate>
-                    <panels:ForceDirectedPanel/>
-                </ControlTemplate>
-            </TreeView.Template>-->
-
-            <TreeView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel/>
-                </ItemsPanelTemplate>
-            </TreeView.ItemsPanel>
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Expander Header="{Binding}">
+                                    <ItemsPresenter Margin="10,0,0,0"/>
+                                </Expander>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TreeView.ItemContainerStyle>
             
         </TreeView>
 
-        <!--
-        <TreeView 
-            x:Name="jigsaw"
+        <piece:JigsawTreemap
             Grid.Column="1"
-            Margin="20"
-            ItemsSource="{Binding}">
+            ItemsSource="{Binding}"
+            ItemContainerStyleSelector="{StaticResource JigsawStyleSelector}">
             
+            <TreeView.Resources>
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="IsExpanded" Value="True"/>
+                </Style>
+            </TreeView.Resources>
+
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate 
-                    ItemsSource="{Binding Path=From}"
-                    DataType="{x:Type model:Table}">
-                    <Canvas>
-                        <piece:Piece x:Name="piece"
-                                     TableName="{Binding Name}"
-                                     X="{Binding Path=(panels:JigsawBoard.X), RelativeSource={RelativeSource Self}}"
-                                     Y="{Binding Path=(panels:JigsawBoard.Y), RelativeSource={RelativeSource Self}}">
-                        
-                            <piece:Piece.ForeignKeyPieces>
-                                <MultiBinding Converter="{StaticResource TableToPieceConverter}">
-                                    <Binding Path="ForeignKey"/>
-                                    <Binding RelativeSource="{RelativeSource Self}"/>
-                                </MultiBinding>                            
-                            </piece:Piece.ForeignKeyPieces>
-                        </piece:Piece>
-                    
-                        <Expander Header="{Binding Name}">
-                            <ItemsPresenter/>
-                        </Expander>
-                    </Canvas>
+                <HierarchicalDataTemplate ItemsSource="{Binding}">
+                    <HierarchicalDataTemplate.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Path=From}">
+                            <TextBlock Text="{Binding Name}"/>
+                        </HierarchicalDataTemplate>
+                    </HierarchicalDataTemplate.ItemTemplate>
+                    <TextBlock Text="{Binding}"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
-
-            <TreeView.ItemContainerStyleSelector>
-                <StyleSelector>
-                    
-                </StyleSelector>
-            </TreeView.ItemContainerStyleSelector>
-
+            
             <TreeView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <panels:ForceDirectedPanel Background="LightGray"/>
-                    <WrapPanel/>
+                    <StackPanel Orientation="Horizontal"/>
                 </ItemsPanelTemplate>
             </TreeView.ItemsPanel>
-        </TreeView>
-        -->
+            
+        </piece:JigsawTreemap>
+
+
     </Grid>
 </Window>

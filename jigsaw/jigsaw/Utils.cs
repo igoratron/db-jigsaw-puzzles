@@ -30,6 +30,24 @@ namespace jigsaw
             return null;
         }
 
+        public static T FindVisualChild<T>(DependencyObject obj) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is T)
+                    return (T)child;
+                else
+                {
+                    T childOfChild = FindVisualChild<T>(child);
+                    if (childOfChild != null)
+                        return childOfChild;
+                }
+            }
+            return null;
+        }
+
+
         #region Color stuff (refactor?)
         public static void HSLtoRGB(double hue, double saturation, double luminance, out double red, out double green, out double blue)
         {
