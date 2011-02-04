@@ -12,5 +12,41 @@ namespace jigsaw.View.Jigsaw
         public JigsawTreemap() : base()
         {
         }
+
+        protected override DependencyObject GetContainerForItemOverride()
+        {
+            return new JigsawTreemapContainer();
+        }
+
+        protected override bool IsItemItsOwnContainerOverride(object item)
+        {
+            return item is JigsawTreemapContainer;
+        }
+    }
+
+    public class JigsawTreemapContainer : TreeViewItem
+    {
+        protected override DependencyObject GetContainerForItemOverride()
+        {
+            return new JigsawTreemapPiece();
+        }
+
+        protected override bool IsItemItsOwnContainerOverride(object item)
+        {
+            return item is JigsawTreemapContainer;
+        }
+    }
+
+    public class JigsawTreemapPiece : TreeViewItem
+    {
+        protected override DependencyObject GetContainerForItemOverride()
+        {
+            return new JigsawTreemapPiece();
+        }
+
+        protected override bool IsItemItsOwnContainerOverride(object item)
+        {
+            return item is JigsawTreemapContainer;
+        }
     }
 }

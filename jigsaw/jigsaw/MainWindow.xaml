@@ -25,8 +25,8 @@
         </Grid.ColumnDefinitions>
         
         <Grid.Resources>
-            <!--applied to the collection element-->
-            <Style x:Key="panelStyle">
+            <!--applied to the container -->
+            <Style TargetType="piece:JigsawTreemapContainer">
                 <Setter Property="TreeViewItem.Template">
                     <Setter.Value>
                         <ControlTemplate>
@@ -42,16 +42,28 @@
                     </Setter.Value>
                 </Setter>
                 <Setter Property="TreeViewItem.IsExpanded" Value="True"/>
+                <Setter Property="Margin" Value="2"/>
             </Style>
 
-            <!--applied to table-->
-            <Style x:Key="pieceStyle">
+            <!--applied to piece-->
+            <Style TargetType="piece:JigsawTreemapPiece">
                 <Setter Property="TreeViewItem.Template">
                     <Setter.Value>
                         <ControlTemplate>
-                            <Expander Header="{Binding Name}">
+                            <!--<Expander Header="{Binding Name}">
                                 <ItemsPresenter Margin="10,0,0,0"/>
-                            </Expander>
+                            </Expander>-->
+                            <piece:Piece x:Name="piece"
+                                        TableName="{Binding Name}"
+                                        X="{Binding Path=(panels:JigsawBoard.X), RelativeSource={RelativeSource Self}}"
+                                        Y="{Binding Path=(panels:JigsawBoard.Y), RelativeSource={RelativeSource Self}}">
+                                <piece:Piece.ForeignKeyPieces>
+                                    <MultiBinding Converter="{StaticResource TableToPieceConverter}">
+                                        <Binding Path="ForeignKey"/>
+                                        <Binding RelativeSource="{RelativeSource Self}"/>
+                                    </MultiBinding>
+                                </piece:Piece.ForeignKeyPieces>
+                            </piece:Piece>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -97,8 +109,8 @@
 
         <piece:JigsawTreemap
             Grid.Column="1"
-            ItemsSource="{Binding}"
-            ItemContainerStyleSelector="{StaticResource JigsawStyleSelector}">
+            ItemsSource="{Binding}">
+            <!--ItemContainerStyleSelector="{StaticResource JigsawStyleSelector}"-->
             
             <TreeView.Resources>
                 <Style TargetType="{x:Type TreeViewItem}">
