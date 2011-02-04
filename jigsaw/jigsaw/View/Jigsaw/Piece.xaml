@@ -77,6 +77,7 @@
                     </Path.Effect>
                 </Path>
                 <Label Content="{Binding Path=Name}"/>
+                <ContentPresenter Content="{TemplateBinding UserControl.Content}" Visibility="Collapsed"/>
             </Canvas>
         </ControlTemplate>
     </UserControl.Template>
