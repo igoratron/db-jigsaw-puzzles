@@ -50,19 +50,19 @@
                 <Setter Property="TreeViewItem.Template">
                     <Setter.Value>
                         <ControlTemplate>
-                            <!--<Expander Header="{Binding Name}">
-                                <ItemsPresenter Margin="10,0,0,0"/>
-                            </Expander>-->
                             <piece:Piece x:Name="piece"
                                         TableName="{Binding Name}"
                                         X="{Binding Path=(panels:JigsawBoard.X), RelativeSource={RelativeSource Self}}"
                                         Y="{Binding Path=(panels:JigsawBoard.Y), RelativeSource={RelativeSource Self}}">
+                                
                                 <piece:Piece.ForeignKeyPieces>
                                     <MultiBinding Converter="{StaticResource TableToPieceConverter}">
                                         <Binding Path="ForeignKey"/>
                                         <Binding RelativeSource="{RelativeSource Self}"/>
                                     </MultiBinding>
-                                </piece:Piece.ForeignKeyPieces>
+                             </piece:Piece.ForeignKeyPieces>
+                                
+                                <ItemsPresenter Margin="10,0,0,0"/>
                             </piece:Piece>
                         </ControlTemplate>
                     </Setter.Value>
