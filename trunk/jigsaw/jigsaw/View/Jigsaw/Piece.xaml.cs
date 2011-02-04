@@ -25,6 +25,22 @@ namespace jigsaw.View.Jigsaw
     {
         private const double RATIO = 300;
 
+        public static readonly RoutedEvent CreatedEvent = EventManager.RegisterRoutedEvent("Created", 
+                                                          RoutingStrategy.Bubble,
+                                                          typeof(RoutedEventHandler), typeof(Piece));
+
+        public event RoutedEventHandler Created 
+        {
+            add
+            {
+                AddHandler(Piece.CreatedEvent, value);
+            }
+            remove
+            {
+                RemoveHandler(Piece.CreatedEvent, value);
+            }
+        }
+
         #region Dependency properties
         public static readonly DependencyProperty TableNameProperty = DependencyProperty.Register("TableName", typeof(String), typeof(Piece));
         public static readonly DependencyProperty ColorProperty = DependencyProperty.Register("Color", typeof(Brush), typeof(Piece));
@@ -361,7 +377,17 @@ namespace jigsaw.View.Jigsaw
         protected override Size MeasureOverride(Size constraint)
         {
             Table t = DataContext as Table;
-            double width = Math.Sqrt(t.Size * RATIO);
+            double width;
+
+            if (t != null)
+            {
+                 width = Math.Sqrt(t.Size * RATIO);
+            }
+            else
+            {
+                width = RATIO;
+            }
+            
 
             return new Size(width, width);
         }

@@ -58,12 +58,6 @@
         </Style>
     </UserControl.Style>
     
-    <UserControl.ContentTemplate>
-        <HierarchicalDataTemplate>
-            <ItemsPresenter/>
-        </HierarchicalDataTemplate>
-    </UserControl.ContentTemplate>
-    
     <UserControl.Template>
         <ControlTemplate>
             <Canvas>
