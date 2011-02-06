@@ -28,22 +28,12 @@ namespace jigsaw.Jigsaw.View.Panels
             {
                 if (elementLayout != null)
                 {
-                    // Respect any Left and Top attached properties, 
-                    // otherwise the child is placed at (0,0) 
-                    //double elementX = JigsawBoard.GetX(child);
-                    //double elementY = JigsawBoard.GetY(child);
-                    //if (!Double.IsNaN(elementX))
-                    //    x = elementX;
-                    //if (!Double.IsNaN(elementY)) 
-                    //    y = elementY;
-                    // Place at the chosen (x,y) location with the child’s DesiredSize 
                     Piece child = JigsawTreemap.getChild(elementLayout.Table);
                     child.Arrange(new Rect(elementLayout.Position, elementLayout.DesiredSize));
-                    //JigsawBoard.SetX(child, elementLayout.Position.X);
-                    //JigsawBoard.SetY(child, elementLayout.Position.Y);
+                    JigsawBoard.SetX(child, elementLayout.Position.X);
+                    JigsawBoard.SetY(child, elementLayout.Position.Y);
                 }
             }
-            // Whatever size you gave me is fine 
             return finalSize;
         }
 

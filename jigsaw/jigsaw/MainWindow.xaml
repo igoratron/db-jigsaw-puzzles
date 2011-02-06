@@ -27,15 +27,13 @@
         <Grid.Resources>
             <!--applied to the container -->
             <Style TargetType="piece:JigsawTreemapContainer">
-                <Setter Property="Background" Value="Green"/>
-                <Setter Property="Margin" Value="2"/>
-                <!--<Setter Property="TreeViewItem.Template">
+                <Setter Property="TreeViewItem.Template">
                     <Setter.Value>
                         <ControlTemplate>
                             <ItemsPresenter/>
                         </ControlTemplate>
                     </Setter.Value>
-                </Setter>-->
+                </Setter>
                 <Setter Property="TreeViewItem.ItemsPanel">
                     <Setter.Value>
                         <ItemsPanelTemplate>

@@ -313,11 +313,12 @@ namespace jigsaw.View.Jigsaw
         private void Reconnect()
         {
             Connect(null);
-            if (ForeignKeyPieces != null)
+            Table table = (Table)DataContext;
+            if (table.ForeignKey != null)
             {
-                foreach (Piece p in ForeignKeyPieces)
+                foreach (Table t in table.ForeignKey)
                 {
-                    Connect(p);
+                    Connect(JigsawTreemap.getChild(t));
                 }
             }
         }
@@ -380,7 +381,7 @@ namespace jigsaw.View.Jigsaw
         {
             Width = arrangeBounds.Width;
             Height = arrangeBounds.Height;
-            //Reconnect();
+            Reconnect();
             return base.ArrangeOverride(arrangeBounds);
         }
     }
