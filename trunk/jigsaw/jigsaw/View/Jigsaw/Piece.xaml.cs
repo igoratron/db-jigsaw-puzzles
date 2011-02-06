@@ -21,25 +21,9 @@ namespace jigsaw.View.Jigsaw
     /// <summary>
     /// Interaction logic for Piece.xaml
     /// </summary>
-    public partial class Piece : UserControl
+    public partial class Piece : TreeViewItem
     {
         private const double RATIO = 300;
-
-        public static readonly RoutedEvent CreatedEvent = EventManager.RegisterRoutedEvent("Created", 
-                                                          RoutingStrategy.Bubble,
-                                                          typeof(RoutedEventHandler), typeof(Piece));
-
-        public event RoutedEventHandler Created 
-        {
-            add
-            {
-                AddHandler(Piece.CreatedEvent, value);
-            }
-            remove
-            {
-                RemoveHandler(Piece.CreatedEvent, value);
-            }
-        }
 
         #region Dependency properties
         public static readonly DependencyProperty TableNameProperty = DependencyProperty.Register("TableName", typeof(String), typeof(Piece));
@@ -396,7 +380,7 @@ namespace jigsaw.View.Jigsaw
         {
             Width = arrangeBounds.Width;
             Height = arrangeBounds.Height;
-            Reconnect();
+            //Reconnect();
             return base.ArrangeOverride(arrangeBounds);
         }
     }
