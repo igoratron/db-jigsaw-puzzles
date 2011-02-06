@@ -27,46 +27,25 @@
         <Grid.Resources>
             <!--applied to the container -->
             <Style TargetType="piece:JigsawTreemapContainer">
-                <Setter Property="TreeViewItem.Template">
+                <Setter Property="Background" Value="Green"/>
+                <Setter Property="Margin" Value="2"/>
+                <!--<Setter Property="TreeViewItem.Template">
                     <Setter.Value>
                         <ControlTemplate>
                             <ItemsPresenter/>
                         </ControlTemplate>
                     </Setter.Value>
-                </Setter>
+                </Setter>-->
                 <Setter Property="TreeViewItem.ItemsPanel">
                     <Setter.Value>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Vertical"/>
+                            <panels:ForceDirectedPanel/>
+                            <!--<StackPanel Orientation="Vertical"/>-->
                         </ItemsPanelTemplate>
                     </Setter.Value>
                 </Setter>
                 <Setter Property="TreeViewItem.IsExpanded" Value="True"/>
                 <Setter Property="Margin" Value="2"/>
-            </Style>
-
-            <!--applied to piece-->
-            <Style TargetType="piece:JigsawTreemapPiece">
-                <Setter Property="TreeViewItem.Template">
-                    <Setter.Value>
-                        <ControlTemplate>
-                            <piece:Piece x:Name="piece"
-                                        TableName="{Binding Name}"
-                                        X="{Binding Path=(panels:JigsawBoard.X), RelativeSource={RelativeSource Self}}"
-                                        Y="{Binding Path=(panels:JigsawBoard.Y), RelativeSource={RelativeSource Self}}">
-                                
-                                <piece:Piece.ForeignKeyPieces>
-                                    <MultiBinding Converter="{StaticResource TableToPieceConverter}">
-                                        <Binding Path="ForeignKey"/>
-                                        <Binding RelativeSource="{RelativeSource Self}"/>
-                                    </MultiBinding>
-                             </piece:Piece.ForeignKeyPieces>
-                                
-                                <ItemsPresenter Margin="10,0,0,0"/>
-                            </piece:Piece>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
             </Style>
         </Grid.Resources>
 
@@ -110,7 +89,6 @@
         <piece:JigsawTreemap
             Grid.Column="1"
             ItemsSource="{Binding}">
-            <!--ItemContainerStyleSelector="{StaticResource JigsawStyleSelector}"-->
             
             <TreeView.Resources>
                 <Style TargetType="{x:Type TreeViewItem}">
@@ -121,11 +99,8 @@
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding}">
                     <HierarchicalDataTemplate.ItemTemplate>
-                        <HierarchicalDataTemplate ItemsSource="{Binding Path=From}">
-                            <TextBlock Text="{Binding Name}"/>
-                        </HierarchicalDataTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Path=From}"/>
                     </HierarchicalDataTemplate.ItemTemplate>
-                    <TextBlock Text="{Binding}"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
             

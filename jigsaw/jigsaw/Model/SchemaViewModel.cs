@@ -22,7 +22,17 @@ namespace jigsaw.Model
             set
             {
                 String path = "../../" + value;
-                Schema = Reorder(ParseXML(path));
+                List<List<Table>> reordered = Reorder(ParseXML(path));
+
+                Schema = new ObservableCollection<ObservableCollection<Table>>();
+
+                //resolve dependencies for drawing
+                foreach(List<Table> group in reordered) 
+                {
+                    List<Table> collection = new List<Table>();
+                    collection.AddRange(ResolveDependencies(group[0]));
+                    Schema.Add(new ObservableCollection<Table>(collection));
+                }
             }
         }
 
@@ -105,9 +115,9 @@ namespace jigsaw.Model
         /// </summary>
         /// <param name="tables"></param>
         /// <returns></returns>
-        private ObservableCollection<ObservableCollection<Table>> Reorder(Dictionary<string, Table> tables)
+        private List<List<Table>> Reorder(Dictionary<string, Table> tables)
         {
-            ObservableCollection<ObservableCollection<Table>> result = new ObservableCollection<ObservableCollection<Table>>();
+            List<List<Table>> result = new List<List<Table>>();
             /// <summary>
             /// Maps Tables to integers in the resulting list;
             /// </summary>
@@ -118,7 +128,7 @@ namespace jigsaw.Model
                 if (!_map.ContainsKey(t))
                 {
                     _map.Add(t, result.Count);
-                    result.Add(new ObservableCollection<Table>());
+                    result.Add(new List<Table>());
                 }
                 result[_map[t]].Add(t);
                 
@@ -167,6 +177,20 @@ namespace jigsaw.Model
                     result.RemoveAt(i);
                 }
             }
+
+            return result;
+        }
+
+        private List<Table> ResolveDependencies(Table table)
+        {
+            List<Table> result = new List<Table>();
+
+            foreach (Table key in table.ForeignKey)
+            {
+                result.AddRange(ResolveDependencies(key));
+            }
+
+            result.Add(table);
 
             return result;
         }

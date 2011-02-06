@@ -12,58 +12,39 @@ namespace jigsaw.Jigsaw.View.Panels
     class ForceDirectedPanel : Panel
     {
         private const double REPULSION_CONSTANT = 40000;	// charge constant
-
         private const double DEFAULT_DAMPING = 0.5;
         private const int DEFAULT_MAX_ITERATIONS = 500;
+        private const bool DETERMINISTIC = true;
 
         private const double RATIO = 300;
 
-        private List<Piece> mNodes;
+        private NodeLayoutInfo[] layoutInfo;
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            Arrange(DEFAULT_DAMPING, DEFAULT_MAX_ITERATIONS, false, finalSize);
+            System.Diagnostics.Debug.WriteLine("Final size: " + finalSize);
 
-            foreach (UIElement child in mNodes)
+            foreach (NodeLayoutInfo elementLayout in layoutInfo)
             {
-                if (child != null)
+                if (elementLayout != null)
                 {
-                    double x = 0;
-                    double y = 0;
                     // Respect any Left and Top attached properties, 
                     // otherwise the child is placed at (0,0) 
-                    double elementX = JigsawBoard.GetX(child);
-                    double elementY = JigsawBoard.GetY(child);
-                    if (!Double.IsNaN(elementX))
-                        x = elementX;
-                    if (!Double.IsNaN(elementY)) 
-                        y = elementY;
+                    //double elementX = JigsawBoard.GetX(child);
+                    //double elementY = JigsawBoard.GetY(child);
+                    //if (!Double.IsNaN(elementX))
+                    //    x = elementX;
+                    //if (!Double.IsNaN(elementY)) 
+                    //    y = elementY;
                     // Place at the chosen (x,y) location with the child’s DesiredSize 
-                    child.Arrange(new Rect(new Point(x, y), child.DesiredSize));
+                    Piece child = JigsawTreemap.getChild(elementLayout.Table);
+                    child.Arrange(new Rect(elementLayout.Position, elementLayout.DesiredSize));
+                    //JigsawBoard.SetX(child, elementLayout.Position.X);
+                    //JigsawBoard.SetY(child, elementLayout.Position.Y);
                 }
             }
             // Whatever size you gave me is fine 
             return finalSize;
-        }
-
-        protected override Size MeasureOverride(Size availableSize)
-        {
-            double totalWidth = 0;
-            double totalHeight = 0;
-
-            foreach (UIElement child in Children)
-            {
-                Table t = ((TreeViewItem)child).DataContext as Table;
-                double width = Math.Sqrt(t.Size * RATIO);
-
-                child.Measure(new Size(width, width));
-
-                Size childSize = child.DesiredSize;
-                totalWidth += childSize.Width;
-                totalHeight += childSize.Height;
-            }
-
-            return new Size(totalWidth, totalHeight);
         }
 
         /// <summary>
@@ -72,29 +53,23 @@ namespace jigsaw.Jigsaw.View.Panels
         /// <param name="damping">Value between 0 and 1 that slows the motion of the nodes during layout.</param>
         /// <param name="maxIterations">Maximum number of iterations before the algorithm terminates.</param>
         /// <param name="deterministic">Whether to use a random or deterministic layout.</param>
-        public void Arrange(double damping, int maxIterations, bool deterministic, Size availableSize)
+        protected override Size MeasureOverride(Size availableSize)
         {
-            NodeLayoutInfo.minPosition = new Point();
+
+            NodeLayoutInfo.MinPosition = new Point(Double.MaxValue, Double.MaxValue);
+            NodeLayoutInfo.MaxPosition = new Point(Double.MinValue, Double.MinValue);
+
             // random starting positions can be made deterministic by seeding System.Random with a constant
-            Random rnd = deterministic ? new Random(0) : new Random();
+            Random rnd = DETERMINISTIC ? new Random(0) : new Random();
 
-            // copy nodes into an array of metadata and randomise initial coordinates for each node
-            mNodes = new List<Piece>();
+            layoutInfo = new NodeLayoutInfo[Children.Count];
 
-            foreach (UIElement element in Children)
+            for (int i = 0; i < layoutInfo.Length; i++)
             {
-                TreeViewItem current = (TreeViewItem)element;
-                Piece p = (Piece)current.Template.FindName("piece", current);
-                mNodes.Add(p);
-            }
-
-            NodeLayoutInfo[] layout = new NodeLayoutInfo[mNodes.Count];
-
-            for (int i = 0; i < mNodes.Count; i++)
-            {
-                layout[i] = new NodeLayoutInfo(mNodes[i], new Vector(), new Point());
-                JigsawBoard.SetX(layout[i].Element, rnd.Next(-50, 50));
-                JigsawBoard.SetY(layout[i].Element, rnd.Next(-50, 50));
+                Children[i].Measure(availableSize);
+                layoutInfo[i] = new NodeLayoutInfo(Children[i], new Vector(), new Point());
+                layoutInfo[i].setX(rnd.Next(-50, 50));
+                layoutInfo[i].setY(rnd.Next(-50, 50));
             }
 
             int stopCount = 0;
@@ -104,51 +79,50 @@ namespace jigsaw.Jigsaw.View.Panels
             {
                 double totalDisplacement = 0;
 
-                for (int i = 0; i < layout.Length; i++)
+                for (int i = 0; i < layoutInfo.Length; i++)
                 {
-                    NodeLayoutInfo current = layout[i];
+                    NodeLayoutInfo current = layoutInfo[i];
 
                     // express the node's current position as a vector, relative to the origin
-                    Point currentElemLocation = new Point(JigsawBoard.GetX(current.Element), JigsawBoard.GetY(current.Element));
-                    Vector currentPosition = new Vector(CalcDistance(new Point(), currentElemLocation),
-                                                        GetBearingAngle(new Point(), currentElemLocation));
+                    Vector vectorPosition = new Vector(CalcDistance(new Point(), current.Position),
+                                                        GetBearingAngle(new Point(), current.Position));
                     Vector netForce = new Vector(0, 0);
 
                     // determine repulsion between nodes
-                    foreach (Piece other in mNodes)
+                    foreach (NodeLayoutInfo other in layoutInfo)
                     {
-                        if (other != current.Element)
-                            netForce += CalcRepulsionForce(current.Element, other);
+                        if (other != current)
+                            netForce += CalcRepulsionForce(current, other);
                     }
 
                     // determine attraction caused by connections
-                    foreach (Piece child in current.Element.ForeignKeyPieces)
+                    foreach (Table table in current.Table.ForeignKey)
                     {
-                        netForce += CalcAttractionForce(current.Element, child);
+                        NodeLayoutInfo other = NodeLayoutInfo.get(table);
+                        netForce += CalcAttractionForce(current, other);
                     }
-                    foreach (Piece parent in mNodes)
+
+                    foreach (NodeLayoutInfo parent in layoutInfo)
                     {
-                        if (parent.ForeignKeyPieces.Contains(current.Element))
-                            netForce += CalcAttractionForce(current.Element, parent);
+                        if (parent.Table.ForeignKey.Contains(current.Table))
+                            netForce += CalcAttractionForce(current, parent);
                     }
 
                     // apply net force to node velocity
-                    current.Velocity = (current.Velocity + netForce) * damping;
+                    current.Velocity = (current.Velocity + netForce) * DEFAULT_DAMPING;
 
                     // apply velocity to node position
-                    current.NextPosition = (currentPosition + current.Velocity).ToPoint();
+                    current.NextPosition = (vectorPosition + current.Velocity).ToPoint();
                 }
 
                 // move nodes to resultant positions (and calculate total displacement)
-                for (int i = 0; i < layout.Length; i++)
+                for (int i = 0; i < layoutInfo.Length; i++)
                 {
-                    NodeLayoutInfo current = layout[i];
+                    NodeLayoutInfo current = layoutInfo[i];
 
-                    Point currentElemLocation = new Point(JigsawBoard.GetX(current.Element), JigsawBoard.GetY(current.Element));
-
-                    totalDisplacement += CalcDistance(currentElemLocation, current.NextPosition);
-                    JigsawBoard.SetX(current.Element, current.NextPosition.X);
-                    JigsawBoard.SetY(current.Element, current.NextPosition.Y);
+                    totalDisplacement += CalcDistance(current.Position, current.NextPosition);
+                    current.setX(current.NextPosition.X);
+                    current.setY(current.NextPosition.Y);
                 }
 
                 iterations++;
@@ -156,17 +130,22 @@ namespace jigsaw.Jigsaw.View.Panels
                     stopCount++;
                 if (stopCount > 15)
                     break;
-                if (iterations > maxIterations)
+                if (iterations > DEFAULT_MAX_ITERATIONS)
                     break;
             }
 
-            foreach (Piece element in mNodes)
-            {
-                Point currentElemLocation = new Point(JigsawBoard.GetX(element), JigsawBoard.GetY(element));
+            Size desiredSize = new Size(NodeLayoutInfo.MaxPosition.X - NodeLayoutInfo.MinPosition.X,
+                                        NodeLayoutInfo.MaxPosition.Y - NodeLayoutInfo.MinPosition.Y);
 
-                JigsawBoard.SetX(element, currentElemLocation.X - NodeLayoutInfo.minPosition.X);
-                JigsawBoard.SetY(element, currentElemLocation.Y - NodeLayoutInfo.minPosition.Y);
+            foreach (NodeLayoutInfo element in layoutInfo)
+            {
+                element.setX(element.Position.X - NodeLayoutInfo.MinPosition.X);
+                element.setY(element.Position.Y - NodeLayoutInfo.MinPosition.Y);
             }
+
+            
+            System.Diagnostics.Debug.WriteLine("Desired size: " + desiredSize);
+            return desiredSize;
         }
 
         /// <summary>
@@ -175,10 +154,10 @@ namespace jigsaw.Jigsaw.View.Panels
         /// <param name="elemA">The node that the force is acting on.</param>
         /// <param name="elemB">The node creating the force.</param>
         /// <returns>A Vector representing the attraction force.</returns>
-        private Vector CalcAttractionForce(UIElement elemA, UIElement elemB)
+        private Vector CalcAttractionForce(NodeLayoutInfo elemA, NodeLayoutInfo elemB)
         {
-            Point elemALocation = new Point(JigsawBoard.GetX(elemA), JigsawBoard.GetY(elemA));
-            Point elemBLocation = new Point(JigsawBoard.GetX(elemB), JigsawBoard.GetY(elemB));
+            Point elemALocation = elemA.Position;
+            Point elemBLocation = elemB.Position;
 
             Size elemASize = elemA.DesiredSize;
             Size elemBSize = elemB.DesiredSize;
@@ -226,10 +205,10 @@ namespace jigsaw.Jigsaw.View.Panels
         /// <param name="elemA">The node that the force is acting on.</param>
         /// <param name="elemB">The node creating the force.</param>
         /// <returns>A Vector representing the repulsion force.</returns>
-        private Vector CalcRepulsionForce(UIElement elemA, UIElement elemB)
+        private Vector CalcRepulsionForce(NodeLayoutInfo elemA, NodeLayoutInfo elemB)
         {
-            Point elemALocation = new Point(JigsawBoard.GetX(elemA), JigsawBoard.GetY(elemA));
-            Point elemBLocation = new Point(JigsawBoard.GetX(elemB), JigsawBoard.GetY(elemB));
+            Point elemALocation = elemA.Position;
+            Point elemBLocation = elemB.Position;
 
             int proximity = Math.Max(CalcDistance(elemALocation, elemBLocation), 1);
 
@@ -277,24 +256,20 @@ namespace jigsaw.Jigsaw.View.Panels
         /// </summary>
         private class NodeLayoutInfo
         {
-            public static Point minPosition = new Point();
-            public Piece Element;			// reference to the node in the simulation
+            public static Point MinPosition;
+            public static Point MaxPosition;
+            public static Dictionary<Table, NodeLayoutInfo> resolver = new Dictionary<Table, NodeLayoutInfo>();
+            private Point position;
+
+            public Size DesiredSize;
+            public Table Table;
             public Vector Velocity;		// the node's current velocity, expressed in vector form
-            
-            private Point nextPosition;
-            public Point NextPosition
+            public Point NextPosition;
+            public Point Position 
             {
                 get
                 {
-                    return nextPosition;
-                }
-                set
-                {
-                    nextPosition = value;
-                    if(value.X < 0)
-                        minPosition.X = value.X < minPosition.X ? value.X : minPosition.X;
-                    if (value.Y < 0)
-                        minPosition.Y = value.Y < minPosition.Y ? value.Y : minPosition.Y;
+                    return position;
                 }
             }
 
@@ -304,11 +279,48 @@ namespace jigsaw.Jigsaw.View.Panels
             /// <param name="node"></param>
             /// <param name="velocity"></param>
             /// <param name="nextPosition"></param>
-            public NodeLayoutInfo(Piece node, Vector velocity, Point nextPosition)
+            public NodeLayoutInfo(UIElement node, Vector velocity, Point nextPosition)
             {
-                Element = node;
+                Table = (Table)((Piece)node).DataContext;
                 Velocity = velocity;
                 NextPosition = nextPosition;
+                position = new Point();
+                DesiredSize = node.DesiredSize;
+                resolver.Add(Table, this);
+            }
+
+            public void setX(double x) 
+            {
+                position.X = x;
+
+                if (x < MinPosition.X)
+                {
+                    MinPosition.X = x;
+                }
+
+                if (x + DesiredSize.Width > MaxPosition.X)
+                {
+                    MaxPosition.X = x + DesiredSize.Width;
+                }
+            }
+
+            public void setY(double y)
+            {
+                position.Y = y;
+                if (y < MinPosition.Y)
+                {
+                    MinPosition.Y = y;
+                }
+
+                if (y + DesiredSize.Height > MaxPosition.Y)
+                {
+                    MaxPosition.Y = y + DesiredSize.Height;
+                }
+            }
+
+            public static NodeLayoutInfo get(Table t)
+            {
+                return resolver[t];
             }
         }
     }
