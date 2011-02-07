@@ -5,12 +5,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:panels="clr-namespace:jigsaw.Jigsaw.View.Panels"
              xmlns:piece="clr-namespace:jigsaw.View.Jigsaw"
-             xmlns:conv="clr-namespace:jigsaw.TypeConverters">
-    
+             xmlns:conv="clr-namespace:jigsaw.TypeConverters"
+             xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing"
+             x:Name="piece">
+   
     <TreeViewItem.RenderTransform>
-        <TranslateTransform
-            X="{Binding Path=DeltaX, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
-            Y="{Binding Path=DeltaY, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+        <TransformGroup>
+            <TranslateTransform
+                X="{Binding Path=DeltaX, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
+                Y="{Binding Path=DeltaY, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+            <ScaleTransform x:Name="scale"/>
+        </TransformGroup>
     </TreeViewItem.RenderTransform>
     
     <TreeViewItem.Resources>
@@ -26,37 +31,40 @@
             </RectangleGeometry.Rect>
         </RectangleGeometry>
         <EllipseGeometry x:Key="Tab" x:Shared="false" RadiusX="20" RadiusY="20"/>
+        
     </TreeViewItem.Resources>
 
     <TreeViewItem.Style>
         <Style>
             <Style.Triggers>
-                <Trigger Property="piece:Piece.IsRightPressed" Value="True">
-                    <Trigger.EnterActions>
-                        <BeginStoryboard>
+                <DataTrigger Binding="{Binding Path=IsInTableView, RelativeSource={RelativeSource Self}}" Value="True">
+                    <DataTrigger.EnterActions>
+                        <BeginStoryboard Name="Enlarge">
                             <Storyboard>
-                                <DoubleAnimation 
-                                    Storyboard.TargetProperty="Width"
-                                    To="300"
-                                    Duration="0:0:0.5"/>
-                                <DoubleAnimation 
-                                    Storyboard.TargetProperty="Height"
-                                    To="300"
-                                    Duration="0:0:0.5"/>
-                                <!--<DoubleAnimation 
-                                    Storyboard.TargetProperty="(JigsawBoard.X)"
-                                    To="0"
-                                    Duration="0:0:0.5"/>
-                                <DoubleAnimation 
-                                    Storyboard.TargetProperty="(JigsawBoard.Y)"
-                                    To="0"
-                                    Duration="0:0:0.5"/>-->
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].ScaleX"
+                                                 To="3"
+                                                 Duration="0:0:0.5"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].ScaleY"
+                                                 To="3"
+                                                 Duration="0:0:0.5"/>
                             </Storyboard>
                         </BeginStoryboard>
-                    </Trigger.EnterActions>
-                    
-                </Trigger>
+                    </DataTrigger.EnterActions>
+                    <DataTrigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].ScaleX"
+                                                 To="1"
+                                                 Duration="0:0:0.5"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].ScaleY"
+                                                 To="1"
+                                                 Duration="0:0:0.5"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.ExitActions>
+                </DataTrigger>
             </Style.Triggers>
+        
             <Setter Property="piece:Piece.ForeignKeyPieces"
                     Value="{Binding Path=ForeignKey, Converter={StaticResource TableToPieceConverter}}"/>
             <Setter Property="piece:Piece.X" Value="{Binding Path=(panels:JigsawBoard.X), RelativeSource={RelativeSource Self}}"/>
@@ -66,15 +74,41 @@
     
     <TreeViewItem.Template>
         <ControlTemplate>
-            <Canvas>
+            <Canvas Name="visual">
                 <Path x:Name="path"
-                    Fill ="{Binding Path=Color, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
-                    Stroke="Black"
-                    StrokeThickness="2"
-                    MouseDown="MouseDownHandler"
-                    MouseMove="MouseMoveHandler"
-                    MouseUp="MouseUpHandler">
-
+                        Fill ="{Binding Path=Color, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
+                        Stroke="Black"
+                        StrokeThickness="2"
+                        MouseDown="MouseDownHandler"
+                        MouseMove="MouseMoveHandler"
+                        MouseUp="MouseUpHandler">
+                    <Path.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsInTableView, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="StrokeThickness"
+                                                                    To="0.67"
+                                                                    Duration="0:0:0.5"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="StrokeThickness"
+                                                                    To="2"
+                                                                    Duration="0:0:0.5"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>    
+                    </Path.Style>
+                    
                     <Path.Data>
                         <CombinedGeometry x:Name="shape" Geometry1="{StaticResource MainRectangle}" Geometry2="{StaticResource Tab}" GeometryCombineMode="Union"/>
                     </Path.Data>
@@ -82,8 +116,152 @@
                         <BlurEffect Radius="2"/>
                     </Path.Effect>
                 </Path>
-                <Label Content="{Binding Path=Name}"/>
-                <!--<ContentPresenter Content="{TemplateBinding UserControl.Content}" Visibility="Collapsed"/>-->
+                <WrapPanel Orientation="Vertical">
+                    <Label Content="{Binding Path=Name}"/>
+                    <WrapPanel Margin="5">
+                        <ItemsPresenter x:Name="tables" Visibility="Collapsed" Opacity="0">
+                            <ItemsPresenter.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <!--itempresenter opacity animation-->
+                                        <DataTrigger Binding="{Binding Path=IsInTableView, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                         To="1"
+                                                                         Duration="0:0:0.5"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                         To="0"
+                                                                         Duration="0:0:0.5"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ItemsPresenter.Style>
+                        </ItemsPresenter>
+                    </WrapPanel>
+                </WrapPanel>
+                <Button Canvas.Left="50" Click="FlipButton_Click">
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Grid>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualStateGroup.Transitions>
+                                            <VisualTransition GeneratedDuration="0:0:0.2" To="MouseOver"/>
+                                        </VisualStateGroup.Transitions>
+                                        <VisualState x:Name="Normal">
+                                            <Storyboard>
+                                                <PointAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)" Storyboard.TargetName="lineArrow">
+                                                    <EasingPointKeyFrame KeyTime="0" Value="0.5,0.5"/>
+                                                </PointAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)" Storyboard.TargetName="lineArrow">
+                                                    <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                                                </DoubleAnimationUsingKeyFrames>
+                                                <PointAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)" Storyboard.TargetName="lineArrow">
+                                                    <EasingPointKeyFrame KeyTime="0" Value="0.5,0.5"/>
+                                                </PointAnimationUsingKeyFrames>
+                                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)" Storyboard.TargetName="lineArrow">
+                                                    <EasingDoubleKeyFrame KeyTime="0" Value="5"/>
+                                                </DoubleAnimationUsingKeyFrames>
+                                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="lineArrow">
+                                                    <EasingDoubleKeyFrame KeyTime="0" Value="9.5"/>
+                                                </DoubleAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed"/>
+                                        <VisualState x:Name="Disabled"/>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <ed:LineArrow x:Name="lineArrow" Fill="#FFF4F4F5" Margin="0,0,29.192,-30" Stroke="Black" StrokeThickness="3" BendAmount="1" ArrowSize="5" RenderTransformOrigin="0,0.5" Grid.Column="1" Height="30" VerticalAlignment="Bottom" Width="29">
+                                    <ed:LineArrow.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform/>
+                                            <SkewTransform/>
+                                            <RotateTransform Angle="-45"/>
+                                            <TranslateTransform/>
+                                        </TransformGroup>
+                                    </ed:LineArrow.RenderTransform>
+                                </ed:LineArrow>
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button>
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Grid RenderTransformOrigin="0.5,0.5">
+                                <Grid.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform/>
+                                        <SkewTransform/>
+                                        <RotateTransform Angle="45"/>
+                                        <TranslateTransform/>
+                                    </TransformGroup>
+                                </Grid.RenderTransform>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualStateGroup.Transitions>
+                                            <VisualTransition GeneratedDuration="0:0:0.2" To="MouseOver"/>
+                                        </VisualStateGroup.Transitions>
+                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="rectangle">
+                                                    <EasingDoubleKeyFrame KeyTime="0" Value="1.5"/>
+                                                </DoubleAnimationUsingKeyFrames>
+                                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="rectangle1">
+                                                    <EasingDoubleKeyFrame KeyTime="0" Value="1.5"/>
+                                                </DoubleAnimationUsingKeyFrames>
+                                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" Storyboard.TargetName="rectangle">
+                                                    <EasingDoubleKeyFrame KeyTime="0" Value="1.5"/>
+                                                </DoubleAnimationUsingKeyFrames>
+                                                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" Storyboard.TargetName="rectangle1">
+                                                    <EasingDoubleKeyFrame KeyTime="0" Value="1.5"/>
+                                                </DoubleAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed"/>
+                                        <VisualState x:Name="Disabled"/>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <Rectangle x:Name="rectangle" Fill="Black" HorizontalAlignment="Right" Height="30" Margin="0,0,-42.833,-65.958" StrokeThickness="5" VerticalAlignment="Bottom" Width="4" RenderTransformOrigin="0.5,0.5">
+                                    <Rectangle.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform/>
+                                            <SkewTransform/>
+                                            <RotateTransform/>
+                                            <TranslateTransform/>
+                                        </TransformGroup>
+                                    </Rectangle.RenderTransform>
+                                </Rectangle>
+                                <Rectangle x:Name="rectangle1" Fill="Black" HorizontalAlignment="Right" Height="4" Margin="0,0,-55.708,-53.083" StrokeThickness="3" VerticalAlignment="Bottom" Width="30" RenderTransformOrigin="0.5,0.5">
+                                    <Rectangle.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform/>
+                                            <SkewTransform/>
+                                            <RotateTransform/>
+                                            <TranslateTransform/>
+                                        </TransformGroup>
+                                    </Rectangle.RenderTransform>
+                                </Rectangle>
+                            </Grid>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
             </Canvas>
         </ControlTemplate>
     </TreeViewItem.Template>

@@ -29,6 +29,10 @@ namespace jigsaw.Jigsaw.View.Panels
                 if (elementLayout != null)
                 {
                     Piece child = JigsawTreemap.getChild(elementLayout.Table);
+
+                    //System.Diagnostics.Debug.WriteLine("Forcing Y coord to 0");
+                    //elementLayout.setY(0);
+
                     child.Arrange(new Rect(elementLayout.Position, elementLayout.DesiredSize));
                     JigsawBoard.SetX(child, elementLayout.Position.X);
                     JigsawBoard.SetY(child, elementLayout.Position.Y);
@@ -50,7 +54,7 @@ namespace jigsaw.Jigsaw.View.Panels
             NodeLayoutInfo.MaxPosition = new Point(Double.MinValue, Double.MinValue);
 
             // random starting positions can be made deterministic by seeding System.Random with a constant
-            Random rnd = DETERMINISTIC ? new Random(0) : new Random();
+            Random rnd = DETERMINISTIC ? new Random(3) : new Random();
 
             layoutInfo = new NodeLayoutInfo[Children.Count];
 
@@ -276,7 +280,8 @@ namespace jigsaw.Jigsaw.View.Panels
                 NextPosition = nextPosition;
                 position = new Point();
                 DesiredSize = node.DesiredSize;
-                resolver.Add(Table, this);
+                if(!resolver.ContainsKey(Table))
+                    resolver.Add(Table, this);
             }
 
             public void setX(double x) 

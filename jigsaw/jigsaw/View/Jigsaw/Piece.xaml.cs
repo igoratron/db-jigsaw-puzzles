@@ -34,7 +34,7 @@ namespace jigsaw.View.Jigsaw
         public static readonly DependencyProperty DeltaYProperty = DependencyProperty.Register("DeltaY", typeof(double), typeof(Piece));
         public static readonly DependencyProperty ForeignKeyPiecesProperty = DependencyProperty.Register("ForeignKeyPieces", typeof(List<Piece>), typeof(Piece));
         public static readonly DependencyProperty IsLeftPressedProperty = DependencyProperty.Register("IsLeftPressed", typeof(Boolean), typeof(Piece));
-        public static readonly DependencyProperty IsRightPressedProperty = DependencyProperty.Register("IsRightPressed", typeof(Boolean), typeof(Piece));
+        public static readonly DependencyProperty IsInTableViewProperty = DependencyProperty.Register("IsInTableView", typeof(Boolean), typeof(Piece));
         #endregion
 
         //Properties
@@ -125,15 +125,15 @@ namespace jigsaw.View.Jigsaw
                 SetValue(IsLeftPressedProperty, value);
             }
         }
-        public Boolean IsRightPressed
+        public Boolean IsInTableView
         {
             get
             {
-                return (Boolean)GetValue(IsRightPressedProperty);
+                return (Boolean)GetValue(IsInTableViewProperty);
             }
             set
             {
-                SetValue(IsRightPressedProperty, value);
+                SetValue(IsInTableViewProperty, value);
             }
         }
 
@@ -178,7 +178,15 @@ namespace jigsaw.View.Jigsaw
 
             if (MouseButtonState.Pressed.Equals(e.RightButton))
             {
-                IsRightPressed = true;
+                if (IsInTableView)
+                {
+                    IsInTableView = false;
+                }
+                else
+                {
+                    IsInTableView = true;
+                    ((ItemsPresenter)this.Template.FindName("tables", this)).Visibility = Visibility.Visible;
+                }
             }
             if (MouseButtonState.Pressed.Equals(e.LeftButton))
             {
@@ -194,10 +202,6 @@ namespace jigsaw.View.Jigsaw
 
         private void MouseUpHandler(object sender, MouseButtonEventArgs e)
         {
-            if (MouseButtonState.Released.Equals(e.RightButton))
-            {
-                IsRightPressed = false;
-            }
             if (MouseButtonState.Released.Equals(e.LeftButton))
             {
                 IsLeftPressed = false;
@@ -297,7 +301,7 @@ namespace jigsaw.View.Jigsaw
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Connecting {0} with {1}", this.TableName, other.TableName);
+                System.Diagnostics.Debug.WriteLine("Connecting {0} with {1}", ((Table)DataContext).Name, ((Table)other.DataContext).Name);
                 Geometry currentGeomtery = path.Data;
                 
                 //FIXME: get rid of this hack! It appears that at this stage rectangle is not yet bound to Width and Height thus
@@ -383,6 +387,21 @@ namespace jigsaw.View.Jigsaw
             Height = arrangeBounds.Height;
             Reconnect();
             return base.ArrangeOverride(arrangeBounds);
+        }
+
+        protected override DependencyObject GetContainerForItemOverride()
+        {
+            return new Piece();
+        }
+
+        protected override bool IsItemItsOwnContainerOverride(object item)
+        {
+            return item is Piece;
+        }
+
+        private void FlipButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
