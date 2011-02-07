@@ -22,7 +22,10 @@ namespace jigsaw.TypeConverters
                 double angle = Math.Atan2(otherPiece.Y + otherPiece.Height / 2 - thisPiece.Y - thisPiece.Height / 2, otherPiece.X + otherPiece.Width / 2 - thisPiece.X - thisPiece.Width / 2);
 
                 if (double.IsNaN(angle))
-                    return null;
+                {
+                    System.Diagnostics.Debug.WriteLine("-> Cannot create a tab. Skipping...");
+                    return new Point();
+                }
 
                 double r1sqrd = thisPiece.Width * thisPiece.Width / (4 * Math.Cos(angle) * Math.Cos(angle));
                 double r2sqrd = thisPiece.Height * thisPiece.Height / (4 * Math.Sin(angle) * Math.Sin(angle));
