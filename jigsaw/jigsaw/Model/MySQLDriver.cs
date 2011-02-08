@@ -142,5 +142,41 @@ namespace jigsaw.Model
             }
             return result;
         }
+
+        public bool isValidJoin(Table a, Table b)
+        {
+            String query = String.Format("SELECT COUNT(*) as size FROM {0} NATURAL JOIN {1};", a.Name, b.Name);
+            bool result = false;
+
+            MySqlConnection sqlConn = new MySqlConnection(CONNECTION_STRING);
+            MySqlCommand command = sqlConn.CreateCommand();
+            MySqlDataReader reader = null;
+            command.CommandText = query;
+
+            try
+            {
+                sqlConn.Open();
+                reader = command.ExecuteReader();
+
+                reader.Read();
+                if (reader.GetInt32(SIZE) > 0)
+                {
+                    result = true;
+                }
+
+                //get foreign keys
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return result;
+        }
     }
 }
