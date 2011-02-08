@@ -20,8 +20,8 @@
         DataContext="{Binding Source={StaticResource viewModel}, Path=Schema}">
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
         
         <Grid.Resources>
@@ -73,7 +73,7 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate>
-                                <Expander Header="{Binding}">
+                                <Expander Header="{Binding}" IsExpanded="True">
                                     <ItemsPresenter Margin="10,0,0,0"/>
                                 </Expander>
                             </ControlTemplate>
@@ -81,6 +81,12 @@
                     </Setter>
                 </Style>
             </TreeView.ItemContainerStyle>
+            
+            <TreeView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"/>
+                </ItemsPanelTemplate>
+            </TreeView.ItemsPanel>
             
         </TreeView>-->
 
@@ -115,7 +121,8 @@
             
             <TreeView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal"/>
+                    <!--<WrapPanel MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"/>-->
+                    <WrapPanel/>
                 </ItemsPanelTemplate>
             </TreeView.ItemsPanel>
             

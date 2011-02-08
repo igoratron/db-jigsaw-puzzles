@@ -255,7 +255,6 @@ namespace jigsaw.View.Jigsaw
                                             new HitTestResultCallback(HitTestCallback),
                                             new GeometryHitTestParameters(g));
 
-                    System.Diagnostics.Debug.WriteLine(hitTestResults.Count);
                     if (hitTestResults.Count == 0)
                     {
                         Connect(null);
@@ -310,7 +309,13 @@ namespace jigsaw.View.Jigsaw
         private HitTestResultBehavior HitTestCallback(HitTestResult result)
         {
             Piece other = Utils.FindAncestor<Piece>(result.VisualHit);
-            hitTestResults.Add(other);
+            
+            //filter if valid join
+            if (MySQLDriver.getInstance().isValidJoin((Table)this.DataContext, (Table)other.DataContext))
+            {
+                hitTestResults.Add(other);
+            }
+            
             return HitTestResultBehavior.Continue;
         }
 

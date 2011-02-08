@@ -14,7 +14,7 @@
             <TranslateTransform
                 X="{Binding Path=DeltaX, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
                 Y="{Binding Path=DeltaY, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
-            <ScaleTransform x:Name="scale"/>
+            <ScaleTransform x:Name="scale" CenterX="150"/>
         </TransformGroup>
     </TreeViewItem.RenderTransform>
     
@@ -118,8 +118,11 @@
                 </Path>
                 <WrapPanel Orientation="Vertical">
                     <Label Content="{Binding Path=Name}"/>
-                    <WrapPanel Margin="5">
+                    <StackPanel Margin="5">
                         <ItemsPresenter x:Name="tables" Visibility="Collapsed" Opacity="0">
+                            <ItemsPresenter.RenderTransform>
+                                <ScaleTransform ScaleX="0.33" ScaleY="0.33"/>
+                            </ItemsPresenter.RenderTransform>
                             <ItemsPresenter.Style>
                                 <Style>
                                     <Style.Triggers>
@@ -148,7 +151,7 @@
                                 </Style>
                             </ItemsPresenter.Style>
                         </ItemsPresenter>
-                    </WrapPanel>
+                    </StackPanel>
                 </WrapPanel>
                 
                 <!--flip button-->
