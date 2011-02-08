@@ -25,7 +25,6 @@ namespace jigsaw
         public MainWindow()
         {
             InitializeComponent();
-            new MySQLDriver();
         }
     }
 }

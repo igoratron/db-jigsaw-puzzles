@@ -41,7 +41,7 @@ namespace jigsaw.Model
             set
             {
                 //fixe: path to database / connection string
-                List<List<Table>> reordered = Reorder(new MySQLDriver().GetSchema());
+                List<List<Table>> reordered = Reorder(MySQLDriver.getInstance().GetSchema());
 
                 Schema = new ObservableCollection<ObservableCollection<Table>>();
 
@@ -212,6 +212,14 @@ namespace jigsaw.Model
             result.Add(table);
 
             return result;
+        }
+
+        public void Connect(Table a, Table b)
+        {
+            Table newTable = MySQLDriver.getInstance().JoinTables(a, b);
+            ObservableCollection<Table> collection = new ObservableCollection<Table>();
+            collection.Add(newTable);
+            Schema.Add(collection);
         }
     }
 }
