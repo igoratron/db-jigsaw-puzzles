@@ -155,10 +155,12 @@ namespace jigsaw.View.Jigsaw
 
         private static DropShadowEffect shadow = new DropShadowEffect();
         private Point startingPosition;
-        private Panel parent;
+        private JigsawTreemap parent;
         private List<Piece> hitTestResults;
 
         private static Random random = new Random();
+        private SchemaViewModel model;
+        private List<Piece> connectedPieces;
         
         public Piece()
         {
@@ -182,6 +184,7 @@ namespace jigsaw.View.Jigsaw
             LinearGradientBrush gradient = new LinearGradientBrush(start, end, 90);
 
             Color = gradient;
+            connectedPieces = new List<Piece>();
         }
 
         private void MouseDownHandler(object sender, MouseButtonEventArgs e)
@@ -206,7 +209,8 @@ namespace jigsaw.View.Jigsaw
                 IsLeftPressed = true;
             }
             
-            parent = Utils.FindAncestor<ForceDirectedPanel>(this);
+            parent = Utils.FindAncestor<JigsawTreemap>(this);
+            model = (SchemaViewModel)FindResource("modelInstance");
 
             startingPosition = el.TranslatePoint(e.GetPosition(this), parent);
             startingPosition.X -= DeltaX;
@@ -229,7 +233,6 @@ namespace jigsaw.View.Jigsaw
         {
             if (MouseButtonState.Pressed.Equals(e.LeftButton))
             {
-                Connect(null);
                 Point relativeToParent = e.GetPosition(parent);
                 Point relativeToThis = e.GetPosition(this);
 
@@ -251,6 +254,13 @@ namespace jigsaw.View.Jigsaw
                                             new HitTestFilterCallback(HitTestFilter),
                                             new HitTestResultCallback(HitTestCallback),
                                             new GeometryHitTestParameters(g));
+
+                    System.Diagnostics.Debug.WriteLine(hitTestResults.Count);
+                    if (hitTestResults.Count == 0)
+                    {
+                        Connect(null);
+                        connectedPieces.Clear();
+                    }
                 }
                 else
                 {
@@ -259,8 +269,14 @@ namespace jigsaw.View.Jigsaw
 
                 foreach (Piece p in hitTestResults)
                 {
-                    this.Snap(p);
-                    this.Connect(p);
+                    if (!connectedPieces.Contains(p))
+                    {
+                        //this.Snap(p);
+                        this.Connect(p);
+                        model.Connect((Table)this.DataContext, (Table)p.DataContext);
+                    }
+
+                    //model.Connect((Table)this.DataContext, (Table)p.DataContext);
                 }
             }
         }
@@ -294,7 +310,6 @@ namespace jigsaw.View.Jigsaw
         private HitTestResultBehavior HitTestCallback(HitTestResult result)
         {
             Piece other = Utils.FindAncestor<Piece>(result.VisualHit);
-            System.Diagnostics.Trace.WriteLine("hit " + other.GetValue(TableNameProperty), "VERBOSE");
             hitTestResults.Add(other);
             return HitTestResultBehavior.Continue;
         }
@@ -311,18 +326,20 @@ namespace jigsaw.View.Jigsaw
             if (other == null)
             {
                 path.Data = (RectangleGeometry)this.Resources["MainRectangle"];
+
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine("Connecting {0} with {1}", ((Table)DataContext).Name, ((Table)other.DataContext).Name);
                 Geometry currentGeomtery = path.Data;
+
+                connectedPieces.Add(other);
                 
                 //FIXME: get rid of this hack! It appears that at this stage rectangle is not yet bound to Width and Height thus
                 //thus the rectangle does not have any area -> combinegeometry discards it!
                 RectangleGeometry rectangle = (RectangleGeometry)this.Resources["MainRectangle"];
                 rectangle.Rect = new Rect(new Size(Width, Height));
                 shape.Geometry1 = rectangle;
-
                 path.Data = CombinedGeometry.Combine(path.Data, CreateTab(other), GeometryCombineMode.Union, null);
             }
         }

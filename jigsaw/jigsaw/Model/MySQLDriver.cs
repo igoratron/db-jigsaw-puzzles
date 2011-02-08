@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace jigsaw.Model
 {
@@ -20,14 +21,25 @@ namespace jigsaw.Model
         #endregion
 
         private static String CONNECTION_STRING = "server=127.0.0.1;userid=root;database=jigsawtest";
-
         private static String TABLE_NAME = "table_name";
         private static String SIZE = "size";
         private static String FOREIGN_KEY= "foreign_key";
 
-        public MySQLDriver()
+        private static MySQLDriver instance;
+
+        private MySQLDriver()
         {
             
+        }
+
+        public static MySQLDriver getInstance() 
+        {
+            if (instance == null)
+            {
+                instance = new MySQLDriver();
+            }
+
+            return instance;
         }
 
         public List<Table> GetSchema()
@@ -64,6 +76,7 @@ namespace jigsaw.Model
                     Table referencedTable = instantiated[reader.GetString(FOREIGN_KEY)];
                     table.ForeignKey.Add(referencedTable);
                 }
+                reader.Close();
             }
             catch (Exception e)
             {
@@ -72,6 +85,60 @@ namespace jigsaw.Model
             finally
             {
                 sqlConn.Close();
+            }
+            return result;
+        }
+
+        public Table JoinTables(Table a, Table b)
+        {
+            Table result = null;
+
+            String query = String.Format("SELECT * FROM {0} NATURAL JOIN {1};", a.Name, b.Name);
+            String newName = String.Format("{0}_and_{1}", a.Name, b.Name);
+            
+            MySqlConnection sqlConn = new MySqlConnection(CONNECTION_STRING);
+            MySqlCommand command = sqlConn.CreateCommand();
+            MySqlDataReader reader = null;
+            command.CommandText = query;
+
+            try
+            {
+                sqlConn.Open();
+                reader = command.ExecuteReader();
+
+                result = new Table(newName, 0);
+                result.Columns = getColumnNames(reader.GetSchemaTable());
+                while (reader.Read())
+                {
+                    object[] values = new object[result.Columns.Count];
+                    reader.GetValues(values);
+                    result.Data.Add(values);
+                }
+
+                result.Size = result.Data.Count;
+                result.From.Add(a);
+                result.From.Add(b);
+
+                //get foreign keys
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+            return result;
+        }
+
+        private List<String> getColumnNames(DataTable schemaTable)
+        {
+            List<String> result = new List<string>();
+            foreach (DataRow row in schemaTable.Rows)
+            {
+                result.Add((String)row["ColumnName"]);
             }
             return result;
         }

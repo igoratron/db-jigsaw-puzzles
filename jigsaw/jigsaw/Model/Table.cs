@@ -29,6 +29,18 @@ namespace jigsaw.Model
             private set;
         }
 
+        public List<String> Columns
+        {
+            get;
+            set;
+        }
+
+        public List<object> Data
+        {
+            get;
+            private set;
+        }
+
         public Table(String name, String size)
         {
             new Table(name, int.Parse(size));
@@ -38,6 +50,8 @@ namespace jigsaw.Model
         {
             ForeignKey = new List<Table>();
             From = new List<Table>();
+            Columns = new List<string>();
+            Data = new List<Object>();
             Size = size;
             Name = name;
         }
