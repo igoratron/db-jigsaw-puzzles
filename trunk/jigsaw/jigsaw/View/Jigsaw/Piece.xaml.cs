@@ -35,6 +35,7 @@ namespace jigsaw.View.Jigsaw
         public static readonly DependencyProperty ForeignKeyPiecesProperty = DependencyProperty.Register("ForeignKeyPieces", typeof(List<Piece>), typeof(Piece));
         public static readonly DependencyProperty IsLeftPressedProperty = DependencyProperty.Register("IsLeftPressed", typeof(Boolean), typeof(Piece));
         public static readonly DependencyProperty IsInTableViewProperty = DependencyProperty.Register("IsInTableView", typeof(Boolean), typeof(Piece));
+        public static readonly DependencyProperty IsInContentViewProperty = DependencyProperty.Register("IsInContentView", typeof(Boolean), typeof(Piece));
         #endregion
 
         //Properties
@@ -136,6 +137,18 @@ namespace jigsaw.View.Jigsaw
                 SetValue(IsInTableViewProperty, value);
             }
         }
+        public Boolean IsInContentView
+        {
+            get
+            {
+                return (Boolean)GetValue(IsInContentViewProperty);
+            }
+            set
+            {
+                SetValue(IsInContentViewProperty, value);
+            }
+        }
+
 
         //Constants
         private const double TAB_RADIUS = 20;
@@ -401,7 +414,7 @@ namespace jigsaw.View.Jigsaw
 
         private void FlipButton_Click(object sender, RoutedEventArgs e)
         {
-
+            IsInContentView = true;
         }
     }
 }

@@ -150,7 +150,9 @@
                         </ItemsPresenter>
                     </WrapPanel>
                 </WrapPanel>
-                <Button Canvas.Left="50" Click="FlipButton_Click">
+                
+                <!--flip button-->
+                <!--<Button Canvas.Left="50" Click="FlipButton_Click">
                     <Button.Template>
                         <ControlTemplate>
                             <Grid>
@@ -199,8 +201,10 @@
                             </Grid>
                         </ControlTemplate>
                     </Button.Template>
-                </Button>
-                <Button>
+                </Button>-->
+                
+                <!--close button-->
+                <!--<Button>
                     <Button.Template>
                         <ControlTemplate>
                             <Grid RenderTransformOrigin="0.5,0.5">
@@ -261,7 +265,7 @@
                             </Grid>
                         </ControlTemplate>
                     </Button.Template>
-                </Button>
+                </Button>-->
             </Canvas>
         </ControlTemplate>
     </TreeViewItem.Template>

@@ -18,7 +18,7 @@
     
     <Grid
         DataContext="{Binding Source={StaticResource viewModel}, Path=Schema}">
-                
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
@@ -47,7 +47,7 @@
             </Style>
         </Grid.Resources>
 
-        <TreeView
+        <!--<TreeView
             Grid.Column="0"
             ItemsSource="{Binding}">
             
@@ -82,11 +82,20 @@
                 </Style>
             </TreeView.ItemContainerStyle>
             
-        </TreeView>
+        </TreeView>-->
 
         <piece:JigsawTreemap
             Grid.Column="1"
             ItemsSource="{Binding}">
+            
+            <TreeView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <LinearGradientBrush.GradientStops>
+                        <GradientStop Color="#3c63e6" Offset="0"/>
+                        <GradientStop Color="#2b2bab" Offset="1"/>
+                    </LinearGradientBrush.GradientStops>
+                </LinearGradientBrush>
+            </TreeView.Background>
             
             <TreeView.Resources>
                 <Style TargetType="{x:Type TreeViewItem}">
@@ -109,7 +118,5 @@
             </TreeView.ItemsPanel>
             
         </piece:JigsawTreemap>
-
-
     </Grid>
 </Window>
