@@ -31,9 +31,14 @@ namespace jigsaw.Model
 
         public Table(String name, String size)
         {
+            new Table(name, int.Parse(size));
+        }
+
+        public Table(String name, int size)
+        {
             ForeignKey = new List<Table>();
             From = new List<Table>();
-            Size = int.Parse(size);
+            Size = size;
             Name = name;
         }
 

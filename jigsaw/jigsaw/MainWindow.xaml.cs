@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using jigsaw.Model;
 
 namespace jigsaw
 {
@@ -24,6 +25,7 @@ namespace jigsaw
         public MainWindow()
         {
             InitializeComponent();
+            new MySQLDriver();
         }
     }
 }

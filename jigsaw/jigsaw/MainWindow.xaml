@@ -10,7 +10,7 @@
         Title="Jigsaw" Width="800" Height="600">
     
     <Window.Resources>
-        <model:SchemaViewModel x:Key="modelInstance" XmlSchemaPath="database.xml"/>
+        <model:SchemaViewModel x:Key="modelInstance" DbSchema="connection string"/>
         <ObjectDataProvider x:Key="viewModel" ObjectInstance="{StaticResource modelInstance}"/>
         <conv:TableToPieceConverter x:Key="TableToPieceConverter"/>
         <piece:JigsawStyleSelector x:Key="JigsawStyleSelector"/>
@@ -91,8 +91,10 @@
             <TreeView.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                     <LinearGradientBrush.GradientStops>
-                        <GradientStop Color="#3c63e6" Offset="0"/>
-                        <GradientStop Color="#2b2bab" Offset="1"/>
+                        <!--<GradientStop Color="#3c63e6" Offset="0"/>
+                        <GradientStop Color="#2b2bab" Offset="1"/>-->
+                        <GradientStop Color="Gray" Offset="0"/>
+                        <GradientStop Color="DarkGray" Offset="1"/>
                     </LinearGradientBrush.GradientStops>
                 </LinearGradientBrush>
             </TreeView.Background>
