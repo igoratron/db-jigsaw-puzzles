@@ -22,12 +22,31 @@ namespace jigsaw.Model
             set
             {
                 String path = "../../" + value;
-                List<List<Table>> reordered = Reorder(ParseXML(path));
+                List<List<Table>> reordered = Reorder(ParseXML(path).Values.ToList());
 
                 Schema = new ObservableCollection<ObservableCollection<Table>>();
 
                 //resolve dependencies for drawing
                 foreach(List<Table> group in reordered) 
+                {
+                    List<Table> collection = new List<Table>();
+                    collection.AddRange(ResolveDependencies(group[0]));
+                    Schema.Add(new ObservableCollection<Table>(collection));
+                }
+            }
+        }
+
+        public String DbSchema
+        {
+            set
+            {
+                //fixe: path to database / connection string
+                List<List<Table>> reordered = Reorder(new MySQLDriver().GetSchema());
+
+                Schema = new ObservableCollection<ObservableCollection<Table>>();
+
+                //resolve dependencies for drawing
+                foreach (List<Table> group in reordered)
                 {
                     List<Table> collection = new List<Table>();
                     collection.AddRange(ResolveDependencies(group[0]));
@@ -115,7 +134,7 @@ namespace jigsaw.Model
         /// </summary>
         /// <param name="tables"></param>
         /// <returns></returns>
-        private List<List<Table>> Reorder(Dictionary<string, Table> tables)
+        private List<List<Table>> Reorder(List<Table> tables)
         {
             List<List<Table>> result = new List<List<Table>>();
             /// <summary>
@@ -123,7 +142,7 @@ namespace jigsaw.Model
             /// </summary>
             Dictionary<Table, int> _map = new Dictionary<Table, int>();
 
-            foreach (Table t in tables.Values)
+            foreach (Table t in tables)
             {
                 if (!_map.ContainsKey(t))
                 {
