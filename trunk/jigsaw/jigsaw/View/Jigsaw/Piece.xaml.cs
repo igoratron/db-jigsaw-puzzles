@@ -15,6 +15,7 @@ using jigsaw.Jigsaw;
 using jigsaw.Model;
 using jigsaw.TypeConverters;
 using jigsaw.Jigsaw.View.Panels;
+using System.Windows.Media.Animation;
 
 namespace jigsaw.View.Jigsaw
 {
@@ -158,9 +159,12 @@ namespace jigsaw.View.Jigsaw
         private JigsawTreemap parent;
         private List<Piece> hitTestResults;
 
-        private static Random random = new Random();
+        private static Random random = new Random(1);
         private SchemaViewModel model;
         private List<Piece> connectedPieces;
+
+        private double hackWidth = 0;
+        private double hackHeight = 0;
         
         public Piece()
         {
@@ -197,11 +201,24 @@ namespace jigsaw.View.Jigsaw
                 if (IsInTableView)
                 {
                     IsInTableView = false;
+                    
+                    Storyboard storyboard = (Storyboard)FindResource("enlarge");
+                    Storyboard shrink = storyboard.Clone();
+
+                    ((DoubleAnimation)shrink.Children[0]).To = hackWidth;
+                    ((DoubleAnimation)shrink.Children[1]).To = hackHeight;
+
+                    shrink.Completed += new EventHandler(shrink_Completed);
+                    shrink.Begin(this);                    
                 }
                 else
                 {
                     IsInTableView = true;
-                    ((ItemsPresenter)this.Template.FindName("tables", this)).Visibility = Visibility.Visible;
+
+                    ((Grid)this.Template.FindName("tables", this)).Visibility = Visibility.Visible;
+
+                    hackHeight = Height;
+                    hackWidth = Width;                    
                 }
             }
             if (MouseButtonState.Pressed.Equals(e.LeftButton))
@@ -217,11 +234,23 @@ namespace jigsaw.View.Jigsaw
             startingPosition.Y -= DeltaY;
         }
 
+        void shrink_Completed(object sender, EventArgs e)
+        {
+            ((Grid)this.Template.FindName("tables", this)).Visibility = Visibility.Collapsed;
+        }
+
         private void MouseUpHandler(object sender, MouseButtonEventArgs e)
         {
-            if (MouseButtonState.Released.Equals(e.LeftButton))
+            if (MouseButton.Left.Equals(e.ChangedButton))
             {
                 IsLeftPressed = false;
+
+                JigsawTreemapContainer thisContainer = (JigsawTreemapContainer)Utils.FindAncestor<JigsawTreemapContainer>(this);
+                
+                foreach (Piece p in connectedPieces)
+                {
+                    model.Connect((Table)this.DataContext, (Table)p.DataContext);
+                }
             }
 
             UIElement el = (UIElement)sender;
@@ -266,16 +295,16 @@ namespace jigsaw.View.Jigsaw
                     System.Diagnostics.Trace.WriteLine("Parent null in filter", "ERROR");
                 }
 
+                Connect(null);
+                connectedPieces.Clear();
+
                 foreach (Piece p in hitTestResults)
                 {
-                    if (!connectedPieces.Contains(p))
-                    {
+                    //if (!connectedPieces.Contains(p))
+                    //{
                         //this.Snap(p);
                         this.Connect(p);
-                        model.Connect((Table)this.DataContext, (Table)p.DataContext);
-                    }
-
-                    //model.Connect((Table)this.DataContext, (Table)p.DataContext);
+                    //}
                 }
             }
         }
@@ -311,7 +340,7 @@ namespace jigsaw.View.Jigsaw
             Piece other = Utils.FindAncestor<Piece>(result.VisualHit);
             
             //filter if valid join
-            if (MySQLDriver.getInstance().isValidJoin((Table)this.DataContext, (Table)other.DataContext))
+            if (MySQLDriver.getInstance().IsValidJoin((Table)this.DataContext, (Table)other.DataContext))
             {
                 hitTestResults.Add(other);
             }
