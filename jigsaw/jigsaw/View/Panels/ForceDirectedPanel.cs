@@ -11,8 +11,8 @@ namespace jigsaw.Jigsaw.View.Panels
 {
     class ForceDirectedPanel : Panel
     {
-        private const double REPULSION_CONSTANT = 40000;	// charge constant
-        private const double DEFAULT_DAMPING = 0.5;
+        private const double REPULSION_CONSTANT = 50000;	// charge constant
+        private const double DEFAULT_DAMPING = 0.6;
         private const int DEFAULT_MAX_ITERATIONS = 500;
         private const bool DETERMINISTIC = true;
 
@@ -22,7 +22,9 @@ namespace jigsaw.Jigsaw.View.Panels
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            System.Diagnostics.Debug.WriteLine("Final size: " + finalSize);
+            System.Diagnostics.Debug.WriteLine("FDL Arrange: " + finalSize);
+
+            Size size = MeasureOverride(finalSize);
 
             foreach (NodeLayoutInfo elementLayout in layoutInfo)
             {
@@ -38,7 +40,7 @@ namespace jigsaw.Jigsaw.View.Panels
                     JigsawBoard.SetY(child, elementLayout.Position.Y);
                 }
             }
-            return finalSize;
+            return size;
         }
 
         /// <summary>
@@ -49,6 +51,7 @@ namespace jigsaw.Jigsaw.View.Panels
         /// <param name="deterministic">Whether to use a random or deterministic layout.</param>
         protected override Size MeasureOverride(Size availableSize)
         {
+            System.Diagnostics.Debug.WriteLine("FDL Measure: " + availableSize);
 
             NodeLayoutInfo.MinPosition = new Point(Double.MaxValue, Double.MaxValue);
             NodeLayoutInfo.MaxPosition = new Point(Double.MinValue, Double.MinValue);
@@ -137,10 +140,8 @@ namespace jigsaw.Jigsaw.View.Panels
                 element.setY(element.Position.Y - NodeLayoutInfo.MinPosition.Y);
             }
 
-            
-            System.Diagnostics.Debug.WriteLine("Desired size: " + desiredSize);
             return desiredSize;
-        }
+       } 
 
         /// <summary>
         /// Calculates the attraction force between two connected nodes

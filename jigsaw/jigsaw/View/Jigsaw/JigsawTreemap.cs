@@ -29,7 +29,8 @@ namespace jigsaw.View.Jigsaw
 
         public static void registerChild(Table t, Piece p)
         {
-            mapping.Add(t, p);
+            if(!mapping.ContainsKey(t))
+                mapping.Add(t, p);
         }
 
         public static Piece getChild(Table t)

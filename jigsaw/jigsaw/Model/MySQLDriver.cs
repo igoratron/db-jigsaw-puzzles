@@ -7,7 +7,7 @@ using System.Data;
 
 namespace jigsaw.Model
 {
-    public class MySQLDriver
+    public class MySQLDriver : IDatabaseController
     {
         #region SQL Commands
         private static String GET_TABLES =
@@ -61,6 +61,7 @@ namespace jigsaw.Model
                 while (reader.Read())
                 {
                     Table t = new Table(reader.GetString(TABLE_NAME), reader.GetInt32(SIZE));
+                    //t.Data.Add(new object[2] { t.Name, t.Size });
                     result.Add(t);
                     instantiated.Add(reader.GetString(TABLE_NAME), t);
                 }
@@ -77,6 +78,13 @@ namespace jigsaw.Model
                     table.ForeignKey.Add(referencedTable);
                 }
                 reader.Close();
+
+                foreach (Table t in instantiated.Values)
+                {
+                    String query = String.Format("SELECT * FROM {0}", t.Name);
+                    MySqlDataAdapter dataAdapter = new MySqlDataAdapter(query, sqlConn);
+                    dataAdapter.Fill(t.DataTable);
+                }
             }
             catch (Exception e)
             {
@@ -96,54 +104,29 @@ namespace jigsaw.Model
             String query = String.Format("SELECT * FROM {0} NATURAL JOIN {1};", a.Name, b.Name);
             String newName = String.Format("{0}_and_{1}", a.Name, b.Name);
             
-            MySqlConnection sqlConn = new MySqlConnection(CONNECTION_STRING);
-            MySqlCommand command = sqlConn.CreateCommand();
-            MySqlDataReader reader = null;
-            command.CommandText = query;
-
             try
             {
-                sqlConn.Open();
-                reader = command.ExecuteReader();
+                MySqlConnection sqlConn = new MySqlConnection(CONNECTION_STRING);
+                MySqlDataAdapter dataAdapter = new MySqlDataAdapter(query, sqlConn);
 
                 result = new Table(newName, 0);
-                result.Columns = getColumnNames(reader.GetSchemaTable());
-                while (reader.Read())
-                {
-                    object[] values = new object[result.Columns.Count];
-                    reader.GetValues(values);
-                    result.Data.Add(values);
-                }
 
-                result.Size = result.Data.Count;
                 result.From.Add(a);
                 result.From.Add(b);
 
-                //get foreign keys
-                reader.Close();
+                dataAdapter.Fill(result.DataTable);
+
+                result.Size = result.DataTable.Rows.Count;
+
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
-            finally
-            {
-                sqlConn.Close();
-            }
             return result;
         }
 
-        private List<String> getColumnNames(DataTable schemaTable)
-        {
-            List<String> result = new List<string>();
-            foreach (DataRow row in schemaTable.Rows)
-            {
-                result.Add((String)row["ColumnName"]);
-            }
-            return result;
-        }
-
-        public bool isValidJoin(Table a, Table b)
+        public bool IsValidJoin(Table a, Table b)
         {
             String query = String.Format("SELECT COUNT(*) as size FROM {0} NATURAL JOIN {1};", a.Name, b.Name);
             bool result = false;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Data;
 
 namespace jigsaw.Model
 {
@@ -35,7 +36,7 @@ namespace jigsaw.Model
             set;
         }
 
-        public List<object> Data
+        public DataTable DataTable
         {
             get;
             private set;
@@ -51,7 +52,7 @@ namespace jigsaw.Model
             ForeignKey = new List<Table>();
             From = new List<Table>();
             Columns = new List<string>();
-            Data = new List<Object>();
+            DataTable = new DataTable();
             Size = size;
             Name = name;
         }

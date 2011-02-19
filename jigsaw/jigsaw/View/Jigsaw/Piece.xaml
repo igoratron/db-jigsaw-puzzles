@@ -31,7 +31,16 @@
             </RectangleGeometry.Rect>
         </RectangleGeometry>
         <EllipseGeometry x:Key="Tab" x:Shared="false" RadiusX="20" RadiusY="20"/>
-        
+
+        <Storyboard x:Key="enlarge" FillBehavior="Stop">
+            <DoubleAnimation Storyboard.TargetProperty="Width"
+                                                 To="500"
+                                                 Duration="0:0:0.5"/>
+            <DoubleAnimation Storyboard.TargetProperty="Height"
+                                                 To="500"
+                                                 Duration="0:0:0.5"/>
+        </Storyboard>
+
     </TreeViewItem.Resources>
 
     <TreeViewItem.Style>
@@ -39,32 +48,10 @@
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Path=IsInTableView, RelativeSource={RelativeSource Self}}" Value="True">
                     <DataTrigger.EnterActions>
-                        <BeginStoryboard Name="Enlarge">
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].ScaleX"
-                                                 To="3"
-                                                 Duration="0:0:0.5"/>
-                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].ScaleY"
-                                                 To="3"
-                                                 Duration="0:0:0.5"/>
-                            </Storyboard>
-                        </BeginStoryboard>
+                        <BeginStoryboard Storyboard="{StaticResource enlarge}"/>
                     </DataTrigger.EnterActions>
-                    <DataTrigger.ExitActions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].ScaleX"
-                                                 To="1"
-                                                 Duration="0:0:0.5"/>
-                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].ScaleY"
-                                                 To="1"
-                                                 Duration="0:0:0.5"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </DataTrigger.ExitActions>
                 </DataTrigger>
             </Style.Triggers>
-        
             <Setter Property="piece:Piece.ForeignKeyPieces"
                     Value="{Binding Path=ForeignKey, Converter={StaticResource TableToPieceConverter}}"/>
             <Setter Property="piece:Piece.X" Value="{Binding Path=(panels:JigsawBoard.X), RelativeSource={RelativeSource Self}}"/>
@@ -79,10 +66,10 @@
                         Fill ="{Binding Path=Color, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
                         Stroke="Black"
                         StrokeThickness="2"
-                        MouseDown="MouseDownHandler"
-                        MouseMove="MouseMoveHandler"
-                        MouseUp="MouseUpHandler">
-                    <Path.Style>
+                        UIElement.MouseDown="MouseDownHandler"
+                        UIElement.MouseMove="MouseMoveHandler"
+                        UIElement.MouseUp="MouseUpHandler">
+                    <!--<Path.Style>
                         <Style>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Path=IsInTableView, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
@@ -107,7 +94,7 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>    
-                    </Path.Style>
+                    </Path.Style>-->
                     
                     <Path.Data>
                         <CombinedGeometry x:Name="shape" Geometry1="{StaticResource MainRectangle}" Geometry2="{StaticResource Tab}" GeometryCombineMode="Union"/>
@@ -116,43 +103,79 @@
                         <BlurEffect Radius="2"/>
                     </Path.Effect>
                 </Path>
-                <WrapPanel Orientation="Vertical">
-                    <Label Content="{Binding Path=Name}"/>
-                    <StackPanel Margin="5">
-                        <ItemsPresenter x:Name="tables" Visibility="Collapsed" Opacity="0">
-                            <ItemsPresenter.RenderTransform>
-                                <ScaleTransform ScaleX="0.33" ScaleY="0.33"/>
-                            </ItemsPresenter.RenderTransform>
-                            <ItemsPresenter.Style>
-                                <Style>
-                                    <Style.Triggers>
-                                        <!--itempresenter opacity animation-->
-                                        <DataTrigger Binding="{Binding Path=IsInTableView, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
-                                            <DataTrigger.EnterActions>
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                <Grid
+                    Width="{Binding Width, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
+                    Height="{Binding Height, RelativeSource={RelativeSource AncestorType=TreeViewItem}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Content="{Binding Path=Name}"/>
+                    <Grid Grid.Row="1" x:Name="tables" Margin="5" Visibility="Collapsed">
+                        
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Grid.Style>
+                            <Style>
+                                <Style.Triggers>
+                                    <!--itempresenter opacity animation-->
+                                    <DataTrigger Binding="{Binding Path=IsInTableView, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                                          To="1"
                                                                          Duration="0:0:0.5"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </DataTrigger.EnterActions>
-                                            <DataTrigger.ExitActions>
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                                          To="0"
                                                                          Duration="0:0:0.5"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </DataTrigger.ExitActions>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        
+                        <!--<Grid.RenderTransform>
+                            <ScaleTransform ScaleX="0.33" ScaleY="0.33"/>
+                        </Grid.RenderTransform>-->
+
+                        <ItemsPresenter Grid.Column="0">
+                            <!--<ItemsPresenter.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TreeViewItem.HasItems, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
+                                                     Value="False">
+                                            <Setter Property="ItemsPresenter.Visibility" Value="Collapsed"/>                                                
                                         </DataTrigger>
-                                    </Style.Triggers>
+                                   </Style.Triggers>
                                 </Style>
-                            </ItemsPresenter.Style>
+                            </ItemsPresenter.Style>-->
                         </ItemsPresenter>
-                    </StackPanel>
-                </WrapPanel>
+
+                        <DataGrid
+                            Opacity="0.8"
+                            Grid.Column="1"
+                            AutoGenerateColumns="True"
+                            EnableRowVirtualization="True"
+                            ScrollViewer.CanContentScroll="True" 
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"
+                            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                            ItemsSource="{Binding DataTable}">
+                            
+                        </DataGrid>                            
+                    </Grid>
+                </Grid>
                 
                 <!--flip button-->
                 <!--<Button Canvas.Left="50" Click="FlipButton_Click">

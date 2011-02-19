@@ -84,6 +84,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\IDatabaseController.cs" />
     <Compile Include="Model\MySQLDriver.cs" />
     <Compile Include="View\Jigsaw\JigsawTreemap.cs" />
     <Compile Include="View\Jigsaw\JigsawStyleSelector.cs" />
